@@ -33,7 +33,7 @@ module.exports = configure(function (ctx) {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli-webpack/boot-files
     boot: [
-      
+
       'axios',
     ],
 
@@ -62,6 +62,10 @@ module.exports = configure(function (ctx) {
 
       // transpile: false,
       // publicPath: '/',
+      env: {
+        API_BASE_URL: process.env.API_BASE_URL || 'http://localhost:3000',
+        DEFAULT_LANGUAGE: process.env.DEFAULT_LANGUAGE || 'ru',
+      },
 
       // Add dependencies for transpiling with Babel (Array of string/regex)
       // (from node_modules, which are by default not transpiled).
@@ -106,7 +110,7 @@ module.exports = configure(function (ctx) {
       // directives: [],
 
       // Quasar plugins
-      plugins: []
+      plugins: ['Notify', 'Dialog', 'LocalStorage', 'Loading']
     },
 
     // animations: 'all', // --- includes all animations

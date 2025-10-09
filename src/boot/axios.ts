@@ -1,5 +1,5 @@
 import { boot } from 'quasar/wrappers';
-import axios, { AxiosInstance } from 'axios';
+import axios, { AxiosError, AxiosInstance } from 'axios';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -7,24 +7,81 @@ declare module '@vue/runtime-core' {
   }
 }
 
-// Be careful when using SSR for cross-request state pollution
-// due to creating a Singleton instance here;
-// If any client changes this (global) instance, it might be a
-// good idea to move this instance creation inside of the
-// "export default () => {}" function below (which runs individually
-// for each client)
-const api = axios.create({ baseURL: 'https://api.example.com' });
+const apiBaseURL = process.env.API_BASE_URL || 'http://localhost:3000';
+const api = axios.create({ baseURL: apiBaseURL });
+
+const ACCESS_TOKEN_STORAGE_KEY = 'ps_access_token';
+
+function getAccessToken(): string | null {
+  try {
+    return localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function setAccessToken(token: string | null): void {
+  try {
+    if (token) {
+      localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
+    } else {
+      localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+    }
+  } catch {
+    // ignore storage errors
+  }
+}
+
+api.interceptors.request.use((config) => {
+  const token = getAccessToken();
+  if (token) {
+    config.headers = config.headers ?? {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Placeholder for future refresh token flow
+let isRefreshing = false;
+let pendingQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
+
+function enqueueRequestPromise(
+  resolve: (value?: unknown) => void,
+  reject: (reason?: unknown) => void
+) {
+  pendingQueue.push({ resolve, reject });
+}
+
+function resolvePendingQueue() {
+  pendingQueue.forEach(({ resolve }) => resolve(undefined));
+  pendingQueue = [];
+}
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      if (!isRefreshing) {
+        isRefreshing = true;
+        // No refresh endpoint yet — perform soft logout behavior
+        setAccessToken(null);
+        isRefreshing = false;
+        resolvePendingQueue();
+      } else {
+        await new Promise(enqueueRequestPromise);
+      }
+      return Promise.reject(error);
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default boot(({ app }) => {
-  // for use inside Vue files (Options API) through this.$axios and this.$api
-
   app.config.globalProperties.$axios = axios;
-  // ^ ^ ^ this will allow you to use this.$axios (for Vue Options API form)
-  //       so you won't necessarily have to import axios in each vue file
-
   app.config.globalProperties.$api = api;
-  // ^ ^ ^ this will allow you to use this.$api (for Vue Options API form)
-  //       so you can easily perform requests against your app's API
 });
 
 export { api };
