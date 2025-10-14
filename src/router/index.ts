@@ -39,6 +39,10 @@ export default route(function (/* { store, ssrContext } */) {
       return { name: 'spells' };
     }
 
+    if (to.path === '/' && !auth.isAuthenticated) {
+      return { name: 'login' };
+    }
+
     return true;
   });
 

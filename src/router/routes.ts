@@ -9,6 +9,7 @@ const routes: RouteRecordRaw[] = [
         path: '',
         name: 'spells',
         component: () => import('src/pages/SpellsPage.vue'),
+        meta: { requiresAuth: true },
       },
 
       {

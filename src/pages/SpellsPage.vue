@@ -42,6 +42,7 @@
     <SpellDetailsDialog v-model="dialogOpen" :spell="details">
       <template #actions>
         <q-btn
+          v-if="character.active"
           :color="!canLearn ? 'negative' : 'primary'"
           :label="!canLearn ? 'Забыть' : 'Выучить'"
           @click="!canLearn ? forget() : learn()"
@@ -175,7 +176,9 @@ onMounted(async () => {
     }
   } catch (e: unknown) {
   } finally {
-    await spells.resetAndFetch();
+    if (spells.items.length === 0) {
+      await spells.resetAndFetch();
+    }
   }
 });
 </script>

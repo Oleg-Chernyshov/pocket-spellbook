@@ -71,7 +71,13 @@ export interface AuthLoginRequest {
 
 export interface AuthLoginResponse {
   access_token: string;
+  refresh_token: string;
   user: User;
+}
+
+export interface AuthRefreshResponse {
+  access_token: string;
+  refresh_token: string;
 }
 
 export interface RegisterRequest {
