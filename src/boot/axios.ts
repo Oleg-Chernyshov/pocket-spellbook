@@ -96,8 +96,8 @@ async function refreshTokens(): Promise<string> {
     throw new Error('No refresh token available');
   }
 
-  const { data } = await api.post(
-    '/auth/refresh',
+  const { data } = await axios.post(
+    `${apiBaseURL}/auth/refresh`,
     {},
     {
       headers: {

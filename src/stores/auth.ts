@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { api } from 'boot/axios';
+import axios from 'axios';
 import type {
   AuthLoginRequest,
   AuthLoginResponse,
@@ -7,6 +8,8 @@ import type {
   RegisterRequest,
   User,
 } from 'src/interfaces';
+
+const apiBaseURL = process.env.API_BASE_URL || 'http://localhost:3000';
 
 const ACCESS_TOKEN_STORAGE_KEY = 'ps_access_token';
 const REFRESH_TOKEN_STORAGE_KEY = 'ps_refresh_token';
@@ -92,8 +95,8 @@ export const useAuthStore = defineStore('auth', {
       }
 
       try {
-        const { data } = await api.post<AuthRefreshResponse>(
-          '/auth/refresh',
+        const { data } = await axios.post<AuthRefreshResponse>(
+          `${apiBaseURL}/auth/refresh`,
           {},
           {
             headers: {
@@ -114,31 +117,13 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    async logout(): Promise<void> {
-      // Пытаемся отправить запрос на logout, но не критично если не получится
-      try {
-        if (this.token) {
-          await api.post(
-            '/auth/logout',
-            {},
-            {
-              headers: {
-                Authorization: `Bearer ${this.token}`,
-              },
-            }
-          );
-        }
-      } catch (error) {
-        // Игнорируем ошибки logout на сервере
-        console.error('Logout error:', error);
-      } finally {
-        // В любом случае очищаем локальное состояние
-        this.user = null;
-        this.token = null;
-        this.refreshToken = null;
-        saveToken(null);
-        saveRefreshToken(null);
-      }
+    logout(): void {
+      // Очищаем локальное состояние
+      this.user = null;
+      this.token = null;
+      this.refreshToken = null;
+      saveToken(null);
+      saveRefreshToken(null);
     },
 
     // Метод для установки токенов (используется в axios interceptor)
