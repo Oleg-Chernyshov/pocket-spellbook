@@ -11,6 +11,8 @@
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
+// Load environment variables from .env file
+require('dotenv').config();
 
 const { configure } = require('quasar/wrappers');
 
