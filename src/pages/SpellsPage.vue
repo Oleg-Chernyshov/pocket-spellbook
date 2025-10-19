@@ -65,9 +65,7 @@ import { useRouter } from 'vue-router';
 import { useSpellsStore } from 'src/stores/spells';
 import { useCharacterStore } from 'src/stores/character';
 import {
-  CHARACTER_CLASSES,
   SPELLCASTER_CLASSES,
-  type CharacterClassCode,
   type SpellLevel,
   type SpellSchool,
   type SourceBook,
@@ -93,9 +91,7 @@ const { dialogOpen, details, loadSpellDetails } = useSpellDetails();
 const search = ref(spells.search);
 const level = ref<SpellLevel | undefined>(spells.level);
 const school = ref<SpellSchool | undefined>(spells.school);
-const characterClass = ref<CharacterClassCode | undefined>(
-  spells.characterClass as CharacterClassCode | undefined
-);
+const characterClass = ref<number | undefined>(spells.characterClass);
 const source = ref<SourceBook | undefined>(spells.source);
 
 const items = computed(() => spells.items);
@@ -150,14 +146,12 @@ watch(
   () => character.active?.characterClassId,
   (newClassId) => {
     if (newClassId) {
-      const charClass = CHARACTER_CLASSES.find((c) => c.id === newClassId);
-
       const isSpellcaster = SPELLCASTER_CLASSES.some(
-        (sc) => sc.id === charClass?.id
+        (sc) => sc.id === newClassId
       );
 
-      if (charClass && isSpellcaster) {
-        characterClass.value = charClass.code;
+      if (isSpellcaster) {
+        characterClass.value = newClassId;
       } else {
         characterClass.value = undefined;
       }
@@ -180,16 +174,11 @@ onMounted(async () => {
     }
 
     if (character.active) {
-      const charClass = CHARACTER_CLASSES.find(
-        (c) => c.id === character.active?.characterClassId
-      );
+      const classId = character.active.characterClassId;
+      const isSpellcaster = SPELLCASTER_CLASSES.some((sc) => sc.id === classId);
 
-      const isSpellcaster = SPELLCASTER_CLASSES.some(
-        (sc) => sc.id === charClass?.id
-      );
-
-      if (charClass && isSpellcaster) {
-        characterClass.value = charClass.code;
+      if (isSpellcaster) {
+        characterClass.value = classId;
       } else {
         characterClass.value = undefined;
       }

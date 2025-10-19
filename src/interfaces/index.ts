@@ -59,7 +59,7 @@ export interface SpellsQuery {
   search?: string;
   level?: SpellLevel;
   school?: SpellSchool;
-  characterClass?: CharacterClassCode;
+  characterClass?: number;
   language?: LanguageCode;
   source?: SourceBook;
 }

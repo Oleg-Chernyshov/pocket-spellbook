@@ -9,7 +9,6 @@ import type {
   SpellLevel,
   SpellSchool,
   SourceBook,
-  CharacterClassCode,
 } from 'src/interfaces';
 
 type FetchState = 'idle' | 'loading' | 'error';
@@ -25,7 +24,7 @@ export const useSpellsStore = defineStore('spells', {
     search: '' as string,
     level: undefined as SpellLevel | undefined,
     school: undefined as SpellSchool | undefined,
-    characterClass: undefined as CharacterClassCode | undefined,
+    characterClass: undefined as number | undefined, // ID класса персонажа
     source: undefined as SourceBook | undefined,
     fetchState: 'idle' as FetchState,
   }),

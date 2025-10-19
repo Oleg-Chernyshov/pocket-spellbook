@@ -79,7 +79,6 @@ import { computed } from 'vue';
 import { useUiStore } from 'src/stores/ui';
 import {
   SPELLCASTER_CLASSES,
-  type CharacterClassCode,
   type SpellLevel,
   type SpellSchool,
   type SourceBook,
@@ -89,7 +88,7 @@ interface Props {
   search: string;
   level?: SpellLevel;
   school?: SpellSchool;
-  characterClass?: CharacterClassCode;
+  characterClass?: number;
   source?: SourceBook;
 }
 
@@ -98,7 +97,7 @@ const emit = defineEmits<{
   (e: 'update:search', v: string): void;
   (e: 'update:level', v: SpellLevel | undefined): void;
   (e: 'update:school', v: SpellSchool | undefined): void;
-  (e: 'update:characterClass', v: CharacterClassCode | undefined): void;
+  (e: 'update:characterClass', v: number | undefined): void;
   (e: 'update:source', v: SourceBook | undefined): void;
 }>();
 
@@ -140,7 +139,7 @@ const schools = computed(() =>
 const classOptions = computed(() =>
   SPELLCASTER_CLASSES.map((c) => ({
     label: ui.language === 'ru' ? c.nameRu : c.code,
-    value: c.code,
+    value: c.id,
   }))
 );
 
