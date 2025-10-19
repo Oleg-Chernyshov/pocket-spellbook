@@ -1,11 +1,13 @@
 <template>
   <div>
-    <div class="text-subtitle2 q-mb-sm">Ячейки заклинаний</div>
+    <div class="text-subtitle2 q-mb-sm">{{ t('character.spellSlots') }}</div>
 
     <div v-if="Object.keys(slots).length > 0">
       <div v-for="lvl in 9" :key="lvl" class="q-mb-sm">
         <div v-if="slots[String(lvl)] > 0" class="row items-center q-gutter-xs">
-          <div class="text-body2" style="min-width: 40px">{{ lvl }} круг:</div>
+          <div class="text-body2" style="min-width: 40px">
+            {{ lvl }} {{ t('common.level') }}:
+          </div>
           <q-radio
             v-for="i in slots[String(lvl)]"
             :key="i"
@@ -20,7 +22,7 @@
 
     <q-btn
       color="primary"
-      label="Долгий отдых"
+      :label="t('character.longRest')"
       icon="refresh"
       no-caps
       @click="$emit('reset-all')"
@@ -29,6 +31,10 @@
 </template>
 
 <script setup lang="ts">
+import { useLocalT } from 'src/composables/useLocaleT';
+
+const { t } = useLocalT();
+
 interface Props {
   slots: Record<string, number>;
   usedSlots: Record<string, boolean[]>;

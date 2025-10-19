@@ -5,29 +5,28 @@
   >
     <q-card style="min-width: 350px">
       <q-card-section>
-        <div class="text-h6">Удаление персонажа</div>
+        <div class="text-h6">{{ t('character.deleteDialog.title') }}</div>
       </q-card-section>
 
       <q-card-section class="q-pt-none">
         <p class="text-body1">
-          Вы уверены, что хотите удалить персонажа
+          {{ t('character.deleteDialog.text1') }}
           <strong>{{ characterName }}</strong
           >?
         </p>
         <p class="text-body2 text-grey-7">
-          Это действие нельзя отменить. Все выученные заклинания и настройки
-          персонажа будут потеряны.
+          {{ t('character.deleteDialog.irreversible') }}
         </p>
       </q-card-section>
 
       <q-card-actions align="right">
         <q-btn
-          label="Отмена"
+          :label="t('common.cancel')"
           color="primary"
           @click="$emit('update:modelValue', false)"
         />
         <q-btn
-          label="Удалить"
+          :label="t('common.delete')"
           color="negative"
           :loading="loading"
           @click="handleDelete"
@@ -38,6 +37,8 @@
 </template>
 
 <script setup lang="ts">
+import { useLocalT } from 'src/composables/useLocaleT';
+
 interface Props {
   modelValue: boolean;
   characterName: string;
@@ -45,10 +46,13 @@ interface Props {
 }
 
 defineProps<Props>();
+
 const emit = defineEmits<{
   (e: 'update:modelValue', value: boolean): void;
   (e: 'delete'): void;
 }>();
+
+const { t } = useLocalT();
 
 function handleDelete() {
   emit('delete');

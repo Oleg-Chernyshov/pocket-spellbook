@@ -59,6 +59,14 @@ export const useSpellsStore = defineStore('spells', {
       this.language = lang;
     },
 
+    clearFilters(): void {
+      this.search = '';
+      this.level = undefined;
+      this.school = undefined;
+      this.characterClass = undefined;
+      this.source = undefined;
+    },
+
     setFilters(params: Partial<Omit<SpellsQuery, 'page' | 'limit'>>): void {
       if (params.search !== undefined) this.search = params.search;
       if (params.level !== undefined) this.level = params.level;

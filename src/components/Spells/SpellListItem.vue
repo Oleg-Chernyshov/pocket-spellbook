@@ -3,7 +3,7 @@
     <q-item-section>
       <div class="text-subtitle1">
         {{ name }}
-        <span class="text-caption">(круг {{ level }})</span>
+        <span class="text-caption">({{ levelLabel }} {{ level }})</span>
       </div>
       <div class="text-caption text-grey">
         {{ school }} • {{ range }} • {{ castingTime }}
@@ -19,6 +19,10 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+import { useLocalT } from 'src/composables/useLocaleT';
+const { t } = useLocalT();
+
 interface Props {
   name: string;
   level: string | number;
@@ -31,6 +35,8 @@ defineProps<Props>();
 defineEmits<{
   (e: 'click'): void;
 }>();
+
+const levelLabel = computed(() => t('common.level'));
 </script>
 
 <script lang="ts">

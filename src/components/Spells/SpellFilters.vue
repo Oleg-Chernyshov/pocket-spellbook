@@ -6,7 +6,7 @@
         @update:model-value="onSearchUpdate"
         dense
         debounce="300"
-        placeholder="Поиск заклинаний"
+        :placeholder="t('filters.searchPlaceholder')"
         clearable
         filled
       >
@@ -23,7 +23,7 @@
         :options="levels"
         dense
         filled
-        label="Круг"
+        :label="t('filters.level')"
         emit-value
         map-options
         clearable
@@ -37,7 +37,7 @@
         :options="schools"
         dense
         filled
-        label="Школа"
+        :label="t('filters.school')"
         emit-value
         map-options
         clearable
@@ -51,7 +51,7 @@
         :options="classOptions"
         dense
         filled
-        label="Класс"
+        :label="t('filters.class')"
         emit-value
         map-options
         clearable
@@ -65,7 +65,7 @@
         :options="sources"
         dense
         filled
-        label="Источник"
+        :label="t('filters.source')"
         emit-value
         map-options
         clearable
@@ -76,8 +76,9 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import { useUiStore } from 'src/stores/ui';
+import { useLocale } from 'src/composables/useLocale';
 import { useSpellsStore } from 'src/stores/spells';
+import { useLocalT } from 'src/composables/useLocaleT';
 import {
   type SpellLevel,
   type SpellSchool,
@@ -102,7 +103,8 @@ const emit = defineEmits<{
 }>();
 
 const spellsStore = useSpellsStore();
-const ui = useUiStore();
+const { t } = useLocalT();
+const { pick, isRu } = useLocale();
 
 function onSearchUpdate(v: string | number | null) {
   emit('update:search', v?.toString() || '');
@@ -138,14 +140,14 @@ const schools = computed(() =>
     { enName: 'Necromancy', ruName: 'Некромантия' },
     { enName: 'Transmutation', ruName: 'Преобразование' },
   ].map((s) => ({
-    label: ui.language === 'ru' ? s.ruName : s.enName,
-    value: ui.language === 'ru' ? s.ruName : s.enName,
+    label: pick(s.ruName, s.enName),
+    value: pick(s.ruName, s.enName),
   }))
 );
 
 const classOptions = computed(() =>
   spellsStore.spellcasterClasses.map((c) => ({
-    label: ui.language === 'ru' ? c.titleRu : c.titleEn,
+    label: isRu.value ? c.titleRu : c.titleEn,
     value: c.id,
   }))
 );

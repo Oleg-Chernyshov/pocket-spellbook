@@ -44,14 +44,14 @@
         <q-btn
           v-if="!character.active"
           color="primary"
-          label="Создать персонажа"
+          :label="t('spells.createCharacter')"
           icon="person_add"
           @click="router.push('/character')"
         />
         <q-btn
           v-else
           :color="!canLearn ? 'negative' : 'primary'"
-          :label="!canLearn ? 'Забыть' : 'Выучить'"
+          :label="!canLearn ? t('spells.forget') : t('spells.learn')"
           @click="!canLearn ? forget() : learn()"
         />
       </template>
@@ -75,6 +75,7 @@ import { useUiStore } from 'src/stores/ui';
 import { useSpellDetails } from 'src/composables/useSpellDetails';
 
 import SpellDetailsDialog from 'src/components/Spells/SpellDetailsDialog.vue';
+import { useLocalT } from 'src/composables/useLocaleT';
 import SpellFilters from 'src/components/Spells/SpellFilters.vue';
 import SpellListItem from 'src/components/Spells/SpellListItem.vue';
 
@@ -84,6 +85,7 @@ const auth = useAuthStore();
 const ui = useUiStore();
 const router = useRouter();
 const $q = useQuasar();
+const { t } = useLocalT();
 
 const { dialogOpen, details, loadSpellDetails } = useSpellDetails();
 
@@ -94,6 +96,9 @@ const characterClass = ref<number | undefined>(spells.characterClass);
 const source = ref<SourceBook | undefined>(spells.source);
 
 const items = computed(() => spells.items);
+const suspendFilters = ref(false);
+
+spells.setLanguage(ui.language);
 
 const isSpellcasterClass = (classId: number): boolean => {
   return spells.spellcasterClasses.some((sc) => sc.id === classId);
@@ -108,6 +113,7 @@ async function onLoad(index: number, done: () => void) {
 }
 
 watch([search, level, school, characterClass, source], async () => {
+  if (suspendFilters.value) return;
   spells.setFilters({
     search: search.value,
     level: level.value,
@@ -135,14 +141,14 @@ async function learn() {
   if (!character.active || !details.value) return;
   await character.learnSpell(character.active.id, details.value.id);
 
-  $q.notify({ type: 'positive', message: 'Заклинание выучено' });
+  $q.notify({ type: 'positive', message: t('spells.learned') });
 }
 
 async function forget() {
   if (!character.active || !details.value) return;
   await character.forgetSpell(character.active.id, details.value.id);
 
-  $q.notify({ type: 'warning', message: 'Заклинание забыто' });
+  $q.notify({ type: 'warning', message: t('spells.forgotten') });
 }
 
 watch(
@@ -162,15 +168,24 @@ watch(
   () => ui.language,
   async (newLang) => {
     spells.setLanguage(newLang);
-    await Promise.all([
-      spells.fetchCharacterClasses(newLang),
-      spells.resetAndFetch(),
-    ]);
+    suspendFilters.value = true;
+
+    spells.clearFilters();
+    search.value = '';
+    level.value = undefined;
+    school.value = undefined;
+    characterClass.value = undefined;
+    source.value = undefined;
+
+    await spells.resetAndFetch();
+    await spells.fetchCharacterClasses(newLang);
+    suspendFilters.value = false;
   }
 );
 
 onMounted(async () => {
   try {
+    spells.setLanguage(ui.language);
     if (spells.characterClasses.length === 0) {
       await spells.fetchCharacterClasses();
     }

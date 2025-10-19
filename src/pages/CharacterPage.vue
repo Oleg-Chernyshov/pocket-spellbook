@@ -3,7 +3,7 @@
     <div class="q-gutter-md">
       <q-card>
         <q-card-section class="flex justify-between">
-          <div class="text-h6">Персонаж</div>
+          <div class="text-h6">{{ t('character.title') }}</div>
           <q-icon
             name="settings"
             class="cursor-pointer"
@@ -38,10 +38,10 @@
               <div class="col-12 col-md-6">
                 <q-input
                   v-model="name"
-                  label="Имя"
+                  :label="t('character.name')"
                   dense
                   filled
-                  :rules="[(v) => !!v || 'Укажите имя']"
+                  :rules="[(v) => !!v || t('character.nameRequired')]"
                 />
               </div>
 
@@ -51,24 +51,26 @@
                   :options="classOptions"
                   emit-value
                   map-options
-                  label="Класс"
+                  :label="t('character.class')"
                   dense
                   filled
-                  :rules="[(v) => !!v || 'Выберите класс']"
+                  :rules="[(v) => !!v || t('character.classRequired')]"
                 />
               </div>
             </div>
 
             <div class="row q-col-gutter-sm q-mt-sm">
               <div class="col-12">
-                <div class="text-subtitle2">Ячейки заклинаний по кругам</div>
+                <div class="text-subtitle2">
+                  {{ t('character.spellSlotsByLevel') }}
+                </div>
               </div>
 
               <div v-for="lvl in 9" :key="lvl" class="col-6 col-md-4 col-lg-3">
                 <q-input
                   v-model.number="spellSlots[String(lvl)]"
                   type="number"
-                  :label="`Круг ${lvl}`"
+                  :label="t('character.circleLabel', { n: lvl })"
                   dense
                   filled
                   :min="0"
@@ -82,7 +84,9 @@
                 <q-btn
                   type="submit"
                   color="primary"
-                  :label="character.active ? 'Сохранить' : 'Создать'"
+                  :label="
+                    character.active ? t('common.save') : t('common.create')
+                  "
                   :loading="saving"
                 />
 
@@ -90,7 +94,7 @@
                   v-if="character.active"
                   color="negative"
                   class="q-ml-sm"
-                  label="Удалить"
+                  :label="t('common.delete')"
                   @click="deleteDialogOpen = true"
                 />
               </div>
@@ -102,10 +106,10 @@
       <q-card v-if="character.active" class="q-mt-md">
         <q-card-section>
           <div class="row items-center justify-between">
-            <div class="text-h6">Выученные заклинания</div>
+            <div class="text-h6">{{ t('character.learnedSpells') }}</div>
             <q-btn
               color="primary"
-              label="К списку заклинаний"
+              :label="t('character.toSpellList')"
               icon="menu_book"
               class="q-mt-sm-xs"
               no-caps
@@ -120,13 +124,11 @@
           <SpellListItem
             v-for="s in character.spells"
             :key="s.id"
-            :name="ui.language === 'ru' ? s.nameRu : s.nameEn"
+            :name="pickField(s, 'name')"
             :level="s.level"
-            :school="ui.language === 'ru' ? s.schoolRu : s.schoolEn"
-            :range="ui.language === 'ru' ? s.rangeRu : s.rangeEn"
-            :casting-time="
-              ui.language === 'ru' ? s.castingTimeRu : s.castingTimeEn
-            "
+            :school="pickField(s, 'school')"
+            :range="pickField(s, 'range')"
+            :casting-time="pickField(s, 'castingTime')"
             @click="openSpellDetails(s)"
           >
             <template #actions>
@@ -141,7 +143,7 @@
           </SpellListItem>
 
           <q-item v-if="!character.spells.length">
-            <q-item-section>Пока пусто</q-item-section>
+            <q-item-section>{{ t('common.empty') }}</q-item-section>
           </q-item>
         </q-list>
       </q-card>
@@ -149,7 +151,11 @@
 
     <SpellDetailsDialog v-model="spellDialogOpen" :spell="selectedSpell">
       <template #actions>
-        <q-btn color="negative" label="Забыть" @click="forgetFromDialog" />
+        <q-btn
+          color="negative"
+          :label="t('spells.forget')"
+          @click="forgetFromDialog"
+        />
       </template>
     </SpellDetailsDialog>
 
@@ -170,6 +176,8 @@ import { useSpellsStore } from 'src/stores/spells';
 import { type CharacterSpell } from 'src/interfaces';
 import { useQuasar } from 'quasar';
 import { useUiStore } from 'src/stores/ui';
+import { useLocale } from 'src/composables/useLocale';
+import { useLocalT } from 'src/composables/useLocaleT';
 
 import SpellDetailsDialog from 'src/components/Spells/SpellDetailsDialog.vue';
 import DeleteCharacterDialog from 'src/components/Character/DeleteCharacterDialog.vue';
@@ -179,6 +187,8 @@ import SpellSlots from 'src/components/Spells/SpellSlots.vue';
 const character = useCharacterStore();
 const spells = useSpellsStore();
 const ui = useUiStore();
+const { t } = useLocalT();
+const { pickField, isRu } = useLocale();
 const router = useRouter();
 const $q = useQuasar();
 
@@ -246,7 +256,7 @@ const spellSlots = ref<Record<string, number>>({
 
 const classOptions = computed(() =>
   spells.characterClasses.map((c) => ({
-    label: ui.language === 'ru' ? `${c.titleRu} (${c.titleEn})` : c.titleEn,
+    label: isRu.value ? `${pickField(c, 'title')} (${c.titleEn})` : c.titleEn,
     value: c.id,
   }))
 );
@@ -268,7 +278,7 @@ function resetAllSlots(): void {
   usedSlots.value = createEmptyUsedSlots();
   saveUsedSlotsToStorage(character.active.id, usedSlots.value);
 
-  $q.notify({ type: 'positive', message: 'Ячейки восстановлены' });
+  $q.notify({ type: 'positive', message: t('character.slotsRestored') });
 }
 
 function loadCharacterData(): void {
@@ -326,7 +336,7 @@ async function save() {
         spellSlots: { ...spellSlots.value },
       });
 
-      $q.notify({ type: 'positive', message: 'Сохранено' });
+      $q.notify({ type: 'positive', message: t('character.saved') });
     } else {
       await character.create({
         name: name.value,
@@ -334,7 +344,7 @@ async function save() {
         spellSlots: { ...spellSlots.value },
       });
 
-      $q.notify({ type: 'positive', message: 'Персонаж создан' });
+      $q.notify({ type: 'positive', message: t('character.created') });
     }
   } finally {
     saving.value = false;
@@ -362,7 +372,7 @@ async function handleDelete() {
 
     usedSlots.value = createEmptyUsedSlots();
     deleteDialogOpen.value = false;
-    $q.notify({ type: 'warning', message: 'Персонаж удален' });
+    $q.notify({ type: 'warning', message: t('character.deleted') });
   } finally {
     deleting.value = false;
   }
@@ -376,7 +386,7 @@ function openSpellDetails(spell: CharacterSpell): void {
 async function forget(spellId: number) {
   if (!character.active) return;
   await character.forgetSpell(character.active.id, spellId);
-  $q.notify({ type: 'warning', message: 'Заклинание забыто' });
+  $q.notify({ type: 'warning', message: t('spells.forgotten') });
 }
 
 async function forgetFromDialog() {
@@ -387,7 +397,7 @@ async function forgetFromDialog() {
   spellDialogOpen.value = false;
   selectedSpell.value = null;
 
-  $q.notify({ type: 'warning', message: 'Заклинание забыто' });
+  $q.notify({ type: 'warning', message: t('spells.forgotten') });
 }
 </script>
 

@@ -9,7 +9,8 @@
           <div>
             <div class="text-h6">{{ spellName }}</div>
             <div class="text-caption text-grey">
-              {{ spellSchool }} • круг {{ spell?.level }} • {{ spellSource }}
+              {{ spellSchool }} • {{ t('common.level') }} {{ spell?.level }} •
+              {{ spellSource }}
             </div>
           </div>
           <q-btn flat dense round icon="close" v-close-popup />
@@ -20,16 +21,22 @@
 
       <q-card-section>
         <div class="q-mb-sm">
-          <b>Время накладывания:</b> {{ spellCastingTime }}
+          <b>{{ t('details.castingTime') }}:</b> {{ spellCastingTime }}
         </div>
-        <div class="q-mb-sm"><b>Дистанция:</b> {{ spellRange }}</div>
-        <div class="q-mb-sm"><b>Компоненты:</b> {{ spellComponents }}</div>
+        <div class="q-mb-sm">
+          <b>{{ t('details.range') }}:</b> {{ spellRange }}
+        </div>
+        <div class="q-mb-sm">
+          <b>{{ t('details.components') }}:</b> {{ spellComponents }}
+        </div>
 
         <div v-if="spellMaterials" class="q-mb-sm">
-          <b>Материалы:</b> {{ spellMaterials }}
+          <b>{{ t('details.materials') }}:</b> {{ spellMaterials }}
         </div>
 
-        <div class="q-mb-sm"><b>Длительность:</b> {{ spellDuration }}</div>
+        <div class="q-mb-sm">
+          <b>{{ t('details.duration') }}:</b> {{ spellDuration }}
+        </div>
         <div style="white-space: pre-wrap" v-html="spellText"></div>
       </q-card-section>
 
@@ -51,7 +58,8 @@ export default {
 <script setup lang="ts">
 import { computed } from 'vue';
 import type { SpellDetails, CharacterSpell } from 'src/interfaces';
-import { useUiStore } from 'src/stores/ui';
+import { useLocalT } from 'src/composables/useLocaleT';
+import { useLocale } from 'src/composables/useLocale';
 
 interface Props {
   modelValue: boolean;
@@ -64,7 +72,8 @@ defineEmits<{
   'update:modelValue': [value: boolean];
 }>();
 
-const ui = useUiStore();
+const { t } = useLocalT();
+const { pickField } = useLocale();
 
 const isCharacterSpell = computed(() => {
   return props.spell && 'nameRu' in props.spell;
@@ -74,8 +83,7 @@ const spellName = computed(() => {
   if (!props.spell) return '';
 
   if (isCharacterSpell.value) {
-    const spell = props.spell as CharacterSpell;
-    return ui.language === 'ru' ? spell.nameRu : spell.nameEn;
+    return pickField(props.spell as CharacterSpell, 'name');
   }
 
   return (props.spell as SpellDetails).name;
@@ -85,8 +93,7 @@ const spellSchool = computed(() => {
   if (!props.spell) return '';
 
   if (isCharacterSpell.value) {
-    const spell = props.spell as CharacterSpell;
-    return ui.language === 'ru' ? spell.schoolRu : spell.schoolEn;
+    return pickField(props.spell as CharacterSpell, 'school');
   }
 
   return (props.spell as SpellDetails).school;
@@ -96,8 +103,7 @@ const spellSource = computed(() => {
   if (!props.spell) return '';
 
   if (isCharacterSpell.value) {
-    const spell = props.spell as CharacterSpell;
-    return ui.language === 'ru' ? spell.sourceRu : spell.sourceEn;
+    return pickField(props.spell as CharacterSpell, 'source');
   }
 
   return (props.spell as SpellDetails).source;
@@ -107,8 +113,7 @@ const spellCastingTime = computed(() => {
   if (!props.spell) return '';
 
   if (isCharacterSpell.value) {
-    const spell = props.spell as CharacterSpell;
-    return ui.language === 'ru' ? spell.castingTimeRu : spell.castingTimeEn;
+    return pickField(props.spell as CharacterSpell, 'castingTime');
   }
 
   return (props.spell as SpellDetails).castingTime;
@@ -118,8 +123,7 @@ const spellRange = computed(() => {
   if (!props.spell) return '';
 
   if (isCharacterSpell.value) {
-    const spell = props.spell as CharacterSpell;
-    return ui.language === 'ru' ? spell.rangeRu : spell.rangeEn;
+    return pickField(props.spell as CharacterSpell, 'range');
   }
 
   return (props.spell as SpellDetails).range;
@@ -129,8 +133,7 @@ const spellComponents = computed(() => {
   if (!props.spell) return '';
 
   if (isCharacterSpell.value) {
-    const spell = props.spell as CharacterSpell;
-    return ui.language === 'ru' ? spell.componentsRu : spell.componentsEn;
+    return pickField(props.spell as CharacterSpell, 'components');
   }
 
   return (props.spell as SpellDetails).components;
@@ -140,8 +143,7 @@ const spellDuration = computed(() => {
   if (!props.spell) return '';
 
   if (isCharacterSpell.value) {
-    const spell = props.spell as CharacterSpell;
-    return ui.language === 'ru' ? spell.durationRu : spell.durationEn;
+    return pickField(props.spell as CharacterSpell, 'duration');
   }
 
   return (props.spell as SpellDetails).duration;
@@ -151,8 +153,7 @@ const spellText = computed(() => {
   if (!props.spell) return '';
 
   if (isCharacterSpell.value) {
-    const spell = props.spell as CharacterSpell;
-    return ui.language === 'ru' ? spell.textRu : spell.textEn;
+    return pickField(props.spell as CharacterSpell, 'text');
   }
 
   return (props.spell as SpellDetails).text;
@@ -162,8 +163,7 @@ const spellMaterials = computed(() => {
   if (!props.spell) return '';
 
   if (isCharacterSpell.value) {
-    const spell = props.spell as CharacterSpell;
-    return ui.language === 'ru' ? spell.materialsRu : spell.materialsEn;
+    return pickField(props.spell as CharacterSpell, 'materials');
   }
 
   return undefined;

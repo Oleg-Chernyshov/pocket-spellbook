@@ -11,7 +11,7 @@
           @click="toggleDrawer"
         />
 
-        <q-toolbar-title>Pocket Spellbook</q-toolbar-title>
+        <q-toolbar-title>{{ t('app.title') }}</q-toolbar-title>
 
         <q-btn
           flat
@@ -40,7 +40,7 @@
             active-class="text-primary"
           >
             <q-item-section avatar><q-icon name="menu_book" /></q-item-section>
-            <q-item-section>Заклинания</q-item-section>
+            <q-item-section>{{ t('nav.spells') }}</q-item-section>
           </q-item>
 
           <q-item
@@ -50,26 +50,26 @@
             active-class="text-primary"
           >
             <q-item-section avatar><q-icon name="person" /></q-item-section>
-            <q-item-section>Персонаж</q-item-section>
+            <q-item-section>{{ t('nav.character') }}</q-item-section>
           </q-item>
 
           <q-separator class="q-my-sm" />
 
           <q-item clickable @click="handleLogout">
             <q-item-section avatar><q-icon name="logout" /></q-item-section>
-            <q-item-section>Выход</q-item-section>
+            <q-item-section>{{ t('nav.logout') }}</q-item-section>
           </q-item>
         </template>
 
         <template v-else>
           <q-item clickable :to="{ name: 'login' }">
             <q-item-section avatar><q-icon name="login" /></q-item-section>
-            <q-item-section>Вход</q-item-section>
+            <q-item-section>{{ t('nav.login') }}</q-item-section>
           </q-item>
 
           <q-item clickable :to="{ name: 'register' }">
             <q-item-section avatar><q-icon name="person_add" /></q-item-section>
-            <q-item-section>Регистрация</q-item-section>
+            <q-item-section>{{ t('nav.register') }}</q-item-section>
           </q-item>
         </template>
       </q-list>
@@ -87,8 +87,10 @@ import { useQuasar } from 'quasar';
 import { useRoute, useRouter } from 'vue-router';
 import { useUiStore } from 'src/stores/ui';
 import { useAuthStore } from 'src/stores/auth';
+import { useLocalT } from 'src/composables/useLocaleT';
 
 const $q = useQuasar();
+const { t } = useLocalT();
 const ui = useUiStore();
 const auth = useAuthStore();
 const route = useRoute();
@@ -126,6 +128,6 @@ function toggleLanguage() {
 function handleLogout() {
   auth.logout();
   router.push({ name: 'login' });
-  $q.notify({ type: 'info', message: 'Вы вышли из системы' });
+  $q.notify({ type: 'info', message: t('auth.loggedOut') });
 }
 </script>

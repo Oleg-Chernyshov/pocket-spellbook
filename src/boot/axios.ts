@@ -6,6 +6,7 @@ import axios, {
 } from 'axios';
 import { Router } from 'vue-router';
 import { Notify } from 'quasar';
+import { i18n } from './i18n';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -165,7 +166,7 @@ api.interceptors.response.use(
         // Показываем уведомление пользователю
         Notify.create({
           type: 'negative',
-          message: 'Сессия истекла. Пожалуйста, войдите снова',
+          message: i18n.global.t('errors.sessionExpired'),
           position: 'top',
         });
 

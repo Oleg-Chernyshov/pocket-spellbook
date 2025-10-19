@@ -1,16 +1,16 @@
 <template>
   <q-page class="q-pa-md flex flex-center">
     <AuthCard
-      title="Регистрация"
-      submitLabel="Создать"
+      :title="t('auth.register.title')"
+      :submitLabel="t('auth.register.submit')"
       :loading="loading"
       @submit="onSubmit"
       :maxWidth="480"
     >
       <q-input
         v-model="name"
-        label="Имя"
-        :rules="[(val) => !!val || 'Введите имя']"
+        :label="t('auth.register.name')"
+        :rules="[(val) => !!val || t('auth.register.nameRequired')]"
         dense
         filled
       />
@@ -18,8 +18,8 @@
       <q-input
         v-model="email"
         type="email"
-        label="Email"
-        :rules="[(val) => !!val || 'Введите email']"
+        :label="t('auth.common.email')"
+        :rules="[(val) => !!val || t('auth.register.emailRequired')]"
         dense
         filled
       />
@@ -27,14 +27,14 @@
       <q-input
         v-model="password"
         type="password"
-        label="Пароль"
-        :rules="[(val) => !!val || 'Введите пароль']"
+        :label="t('auth.common.password')"
+        :rules="[(val) => !!val || t('auth.register.passwordRequired')]"
         dense
         filled
       />
 
       <template #alt>
-        <q-btn flat to="/login" label="Войти" />
+        <q-btn flat to="/login" :label="t('auth.register.loginLink')" />
       </template>
     </AuthCard>
   </q-page>
@@ -45,6 +45,7 @@ import { ref, defineAsyncComponent } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from 'src/stores/auth';
 import { useQuasar } from 'quasar';
+import { useLocalT } from 'src/composables/useLocaleT';
 
 const AuthCard = defineAsyncComponent(
   () => import('src/components/Auth/AuthCard.vue')
@@ -56,6 +57,7 @@ const password = ref('');
 const auth = useAuthStore();
 const router = useRouter();
 const $q = useQuasar();
+const { t } = useLocalT();
 
 const loading = ref(false);
 
@@ -69,10 +71,10 @@ async function onSubmit() {
       password: password.value,
     });
 
-    $q.notify({ type: 'positive', message: 'Регистрация выполнена' });
+    $q.notify({ type: 'positive', message: t('auth.register.success') });
     router.replace('/character');
   } catch {
-    $q.notify({ type: 'negative', message: 'Ошибка регистрации' });
+    $q.notify({ type: 'negative', message: t('auth.register.error') });
   } finally {
     loading.value = false;
   }
