@@ -2,17 +2,19 @@
   <div>
     <div class="text-subtitle2 q-mb-sm">Ячейки заклинаний</div>
 
-    <div v-for="lvl in 9" :key="lvl" class="q-mb-sm">
-      <div v-if="slots[String(lvl)] > 0" class="row items-center q-gutter-xs">
-        <div class="text-body2" style="min-width: 40px">{{ lvl }} круг:</div>
-        <q-radio
-          v-for="i in slots[String(lvl)]"
-          :key="i"
-          :model-value="usedSlots[String(lvl)][i - 1]"
-          :val="true"
-          @click="$emit('toggle-slot', String(lvl), i - 1)"
-          dense
-        />
+    <div v-if="Object.keys(slots).length > 0">
+      <div v-for="lvl in 9" :key="lvl" class="q-mb-sm">
+        <div v-if="slots[String(lvl)] > 0" class="row items-center q-gutter-xs">
+          <div class="text-body2" style="min-width: 40px">{{ lvl }} круг:</div>
+          <q-radio
+            v-for="i in slots[String(lvl)]"
+            :key="i"
+            :model-value="usedSlots[String(lvl)][i - 1]"
+            :val="true"
+            @click="$emit('toggle-slot', String(lvl), i - 1)"
+            dense
+          />
+        </div>
       </div>
     </div>
 
@@ -20,7 +22,6 @@
       color="primary"
       label="Долгий отдых"
       icon="refresh"
-      class="q-mt-md"
       no-caps
       @click="$emit('reset-all')"
     />

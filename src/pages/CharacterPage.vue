@@ -101,7 +101,17 @@
 
       <q-card v-if="character.active" class="q-mt-md">
         <q-card-section>
-          <div class="text-h6">Выученные заклинания</div>
+          <div class="row items-center justify-between">
+            <div class="text-h6">Выученные заклинания</div>
+            <q-btn
+              color="primary"
+              label="К списку заклинаний"
+              icon="menu_book"
+              class="q-mt-sm-xs"
+              no-caps
+              @click="router.push('/')"
+            />
+          </div>
         </q-card-section>
 
         <q-separator />
@@ -154,6 +164,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useCharacterStore } from 'src/stores/character';
 import { CHARACTER_CLASSES, type CharacterSpell } from 'src/interfaces';
 import { useQuasar } from 'quasar';
@@ -166,6 +177,7 @@ import SpellSlots from 'src/components/Spells/SpellSlots.vue';
 
 const character = useCharacterStore();
 const ui = useUiStore();
+const router = useRouter();
 const $q = useQuasar();
 
 const spellDialogOpen = ref(false);
@@ -365,3 +377,11 @@ async function forgetFromDialog() {
   $q.notify({ type: 'warning', message: 'Заклинание забыто' });
 }
 </script>
+
+<style scoped>
+.q-mt-sm-xs {
+  @media (max-width: 600px) {
+    margin-top: 10px;
+  }
+}
+</style>

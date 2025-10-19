@@ -57,7 +57,7 @@ async function onSubmit() {
   try {
     await auth.login({ email: email.value.trim(), password: password.value });
     $q.notify({ type: 'positive', message: 'Добро пожаловать!' });
-    const redirect = (route.query.redirect as string) || '/';
+    const redirect = (route.query.redirect as string) || '/character';
     router.replace(redirect);
   } catch {
     $q.notify({ type: 'negative', message: 'Ошибка входа' });

@@ -70,7 +70,7 @@ async function onSubmit() {
     });
 
     $q.notify({ type: 'positive', message: 'Регистрация выполнена' });
-    router.replace('/');
+    router.replace('/character');
   } catch {
     $q.notify({ type: 'negative', message: 'Ошибка регистрации' });
   } finally {

@@ -42,7 +42,14 @@
     <SpellDetailsDialog v-model="dialogOpen" :spell="details">
       <template #actions>
         <q-btn
-          v-if="character.active"
+          v-if="!character.active"
+          color="primary"
+          label="Создать персонажа"
+          icon="person_add"
+          @click="router.push('/character')"
+        />
+        <q-btn
+          v-else
           :color="!canLearn ? 'negative' : 'primary'"
           :label="!canLearn ? 'Забыть' : 'Выучить'"
           @click="!canLearn ? forget() : learn()"
@@ -54,6 +61,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useSpellsStore } from 'src/stores/spells';
 import { useCharacterStore } from 'src/stores/character';
 import {
@@ -76,6 +84,7 @@ const spells = useSpellsStore();
 const character = useCharacterStore();
 const auth = useAuthStore();
 const ui = useUiStore();
+const router = useRouter();
 const $q = useQuasar();
 
 const { dialogOpen, details, loadSpellDetails } = useSpellDetails();
