@@ -75,10 +75,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useUiStore } from 'src/stores/ui';
+import { useSpellsStore } from 'src/stores/spells';
 import {
-  SPELLCASTER_CLASSES,
   type SpellLevel,
   type SpellSchool,
   type SourceBook,
@@ -101,9 +101,18 @@ const emit = defineEmits<{
   (e: 'update:source', v: SourceBook | undefined): void;
 }>();
 
+const spellsStore = useSpellsStore();
+const ui = useUiStore();
+
 function onSearchUpdate(v: string | number | null) {
   emit('update:search', v?.toString() || '');
 }
+
+onMounted(() => {
+  if (spellsStore.characterClasses.length === 0) {
+    spellsStore.fetchCharacterClasses();
+  }
+});
 
 const levels = [
   { label: '0', value: '0' },
@@ -117,8 +126,6 @@ const levels = [
   { label: '8', value: '8' },
   { label: '9', value: '9' },
 ] as const;
-
-const ui = useUiStore();
 
 const schools = computed(() =>
   [
@@ -137,8 +144,8 @@ const schools = computed(() =>
 );
 
 const classOptions = computed(() =>
-  SPELLCASTER_CLASSES.map((c) => ({
-    label: ui.language === 'ru' ? c.nameRu : c.code,
+  spellsStore.spellcasterClasses.map((c) => ({
+    label: ui.language === 'ru' ? c.titleRu : c.titleEn,
     value: c.id,
   }))
 );

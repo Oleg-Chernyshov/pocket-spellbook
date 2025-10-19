@@ -65,7 +65,6 @@ import { useRouter } from 'vue-router';
 import { useSpellsStore } from 'src/stores/spells';
 import { useCharacterStore } from 'src/stores/character';
 import {
-  SPELLCASTER_CLASSES,
   type SpellLevel,
   type SpellSchool,
   type SourceBook,
@@ -95,6 +94,10 @@ const characterClass = ref<number | undefined>(spells.characterClass);
 const source = ref<SourceBook | undefined>(spells.source);
 
 const items = computed(() => spells.items);
+
+const isSpellcasterClass = (classId: number): boolean => {
+  return spells.spellcasterClasses.some((sc) => sc.id === classId);
+};
 
 async function onLoad(index: number, done: () => void) {
   try {
@@ -146,11 +149,7 @@ watch(
   () => character.active?.characterClassId,
   (newClassId) => {
     if (newClassId) {
-      const isSpellcaster = SPELLCASTER_CLASSES.some(
-        (sc) => sc.id === newClassId
-      );
-
-      if (isSpellcaster) {
+      if (isSpellcasterClass(newClassId)) {
         characterClass.value = newClassId;
       } else {
         characterClass.value = undefined;
@@ -163,21 +162,27 @@ watch(
   () => ui.language,
   async (newLang) => {
     spells.setLanguage(newLang);
-    await spells.resetAndFetch();
+    await Promise.all([
+      spells.fetchCharacterClasses(newLang),
+      spells.resetAndFetch(),
+    ]);
   }
 );
 
 onMounted(async () => {
   try {
+    if (spells.characterClasses.length === 0) {
+      await spells.fetchCharacterClasses();
+    }
+
     if (auth.isAuthenticated && !character.active) {
       await character.loadActive();
     }
 
     if (character.active) {
       const classId = character.active.characterClassId;
-      const isSpellcaster = SPELLCASTER_CLASSES.some((sc) => sc.id === classId);
 
-      if (isSpellcaster) {
+      if (isSpellcasterClass(classId)) {
         characterClass.value = classId;
       } else {
         characterClass.value = undefined;

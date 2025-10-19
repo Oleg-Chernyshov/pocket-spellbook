@@ -9,6 +9,7 @@ import type {
   SpellLevel,
   SpellSchool,
   SourceBook,
+  CharacterClass,
 } from 'src/interfaces';
 
 type FetchState = 'idle' | 'loading' | 'error';
@@ -27,6 +28,7 @@ export const useSpellsStore = defineStore('spells', {
     characterClass: undefined as number | undefined, // ID класса персонажа
     source: undefined as SourceBook | undefined,
     fetchState: 'idle' as FetchState,
+    characterClasses: [] as CharacterClass[], // Все классы персонажей
   }),
 
   getters: {
@@ -45,6 +47,10 @@ export const useSpellsStore = defineStore('spells', {
         language: state.language,
         source: state.source,
       };
+    },
+
+    spellcasterClasses(state): CharacterClass[] {
+      return state.characterClasses.filter((cls) => cls.hasSpells === 1);
     },
   },
 
@@ -89,6 +95,13 @@ export const useSpellsStore = defineStore('spells', {
       } finally {
         this.fetchState = 'idle';
       }
+    },
+
+    async fetchCharacterClasses(language?: LanguageCode): Promise<void> {
+      const { data } = await api.get<CharacterClass[]>('/spells/classes', {
+        params: { language: language || this.language },
+      });
+      this.characterClasses = data;
     },
   },
 });

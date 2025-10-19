@@ -166,7 +166,8 @@
 import { onMounted, ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCharacterStore } from 'src/stores/character';
-import { CHARACTER_CLASSES, type CharacterSpell } from 'src/interfaces';
+import { useSpellsStore } from 'src/stores/spells';
+import { type CharacterSpell } from 'src/interfaces';
 import { useQuasar } from 'quasar';
 import { useUiStore } from 'src/stores/ui';
 
@@ -176,6 +177,7 @@ import SpellListItem from 'src/components/Spells/SpellListItem.vue';
 import SpellSlots from 'src/components/Spells/SpellSlots.vue';
 
 const character = useCharacterStore();
+const spells = useSpellsStore();
 const ui = useUiStore();
 const router = useRouter();
 const $q = useQuasar();
@@ -243,8 +245,8 @@ const spellSlots = ref<Record<string, number>>({
 });
 
 const classOptions = computed(() =>
-  CHARACTER_CLASSES.map((c) => ({
-    label: `${c.nameRu} (${c.code})`,
+  spells.characterClasses.map((c) => ({
+    label: ui.language === 'ru' ? `${c.titleRu} (${c.titleEn})` : c.titleEn,
     value: c.id,
   }))
 );
@@ -292,7 +294,18 @@ watch(
   }
 );
 
+watch(
+  () => ui.language,
+  async (newLang) => {
+    await spells.fetchCharacterClasses(newLang);
+  }
+);
+
 onMounted(async () => {
+  if (spells.characterClasses.length === 0) {
+    await spells.fetchCharacterClasses();
+  }
+
   if (!character.active) {
     await character.loadActive();
   }

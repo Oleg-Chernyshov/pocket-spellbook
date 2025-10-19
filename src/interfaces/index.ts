@@ -148,6 +148,14 @@ export interface CharacterClassOption {
   nameRu: string;
 }
 
+export interface CharacterClass {
+  id: number;
+  title: string;
+  titleEn: string;
+  titleRu: string;
+  hasSpells: number; // 0 или 1
+}
+
 export type CharacterClassCode =
   | 'Artificer'
   | 'Bard'
