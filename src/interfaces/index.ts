@@ -157,9 +157,30 @@ export type CharacterClassCode =
   | 'Ranger'
   | 'Sorcerer'
   | 'Warlock'
-  | 'Wizard';
+  | 'Wizard'
+  | 'Barbarian'
+  | 'Fighter'
+  | 'Monk'
+  | 'Rogue';
 
 export const CHARACTER_CLASSES: CharacterClassOption[] = [
+  { id: 1, code: 'Artificer', nameRu: 'Изобретатель' },
+  { id: 2, code: 'Bard', nameRu: 'Бард' },
+  { id: 3, code: 'Cleric', nameRu: 'Жрец' },
+  { id: 4, code: 'Druid', nameRu: 'Друид' },
+  { id: 5, code: 'Paladin', nameRu: 'Паладин' },
+  { id: 6, code: 'Ranger', nameRu: 'Рейнджер' },
+  { id: 7, code: 'Sorcerer', nameRu: 'Чародей' },
+  { id: 8, code: 'Warlock', nameRu: 'Колдун' },
+  { id: 9, code: 'Wizard', nameRu: 'Волшебник' },
+  { id: 10, code: 'Barbarian', nameRu: 'Варвар' },
+  { id: 11, code: 'Fighter', nameRu: 'Воин' },
+  { id: 12, code: 'Monk', nameRu: 'Монах' },
+  { id: 13, code: 'Rogue', nameRu: 'Плут' },
+];
+
+// Классы, которые используют заклинания (для фильтров)
+export const SPELLCASTER_CLASSES: CharacterClassOption[] = [
   { id: 1, code: 'Artificer', nameRu: 'Изобретатель' },
   { id: 2, code: 'Bard', nameRu: 'Бард' },
   { id: 3, code: 'Cleric', nameRu: 'Жрец' },

@@ -66,6 +66,7 @@ import { useSpellsStore } from 'src/stores/spells';
 import { useCharacterStore } from 'src/stores/character';
 import {
   CHARACTER_CLASSES,
+  SPELLCASTER_CLASSES,
   type CharacterClassCode,
   type SpellLevel,
   type SpellSchool,
@@ -146,15 +147,19 @@ async function forget() {
 }
 
 watch(
-  () => character.active,
-  (newChar) => {
-    if (newChar) {
-      const charClass = CHARACTER_CLASSES.find(
-        (c) => c.id === newChar.characterClassId
+  () => character.active?.characterClassId,
+  (newClassId) => {
+    if (newClassId) {
+      const charClass = CHARACTER_CLASSES.find((c) => c.id === newClassId);
+
+      const isSpellcaster = SPELLCASTER_CLASSES.some(
+        (sc) => sc.id === charClass?.id
       );
 
-      if (charClass && !characterClass.value) {
+      if (charClass && isSpellcaster) {
         characterClass.value = charClass.code;
+      } else {
+        characterClass.value = undefined;
       }
     }
   }
@@ -179,11 +184,18 @@ onMounted(async () => {
         (c) => c.id === character.active?.characterClassId
       );
 
-      if (charClass && !characterClass.value) {
+      const isSpellcaster = SPELLCASTER_CLASSES.some(
+        (sc) => sc.id === charClass?.id
+      );
+
+      if (charClass && isSpellcaster) {
         characterClass.value = charClass.code;
+      } else {
+        characterClass.value = undefined;
       }
     }
   } catch (e: unknown) {
+    // ignore errors
   } finally {
     if (spells.items.length === 0) {
       await spells.resetAndFetch();

@@ -78,7 +78,7 @@
 import { computed } from 'vue';
 import { useUiStore } from 'src/stores/ui';
 import {
-  CHARACTER_CLASSES,
+  SPELLCASTER_CLASSES,
   type CharacterClassCode,
   type SpellLevel,
   type SpellSchool,
@@ -138,7 +138,7 @@ const schools = computed(() =>
 );
 
 const classOptions = computed(() =>
-  CHARACTER_CLASSES.map((c) => ({
+  SPELLCASTER_CLASSES.map((c) => ({
     label: ui.language === 'ru' ? c.nameRu : c.code,
     value: c.code,
   }))
