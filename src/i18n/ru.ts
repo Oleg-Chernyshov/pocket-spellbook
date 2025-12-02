@@ -45,6 +45,10 @@ const ru = {
       error: 'Ошибка регистрации',
       loginLink: 'Войти',
     },
+    common: {
+      email: 'Email',
+      password: 'Пароль',
+    },
     loggedOut: 'Вы вышли из системы',
   },
   character: {

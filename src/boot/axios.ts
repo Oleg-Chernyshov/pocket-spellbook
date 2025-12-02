@@ -7,6 +7,7 @@ import axios, {
 import { Router } from 'vue-router';
 import { Notify } from 'quasar';
 import { i18n } from './i18n';
+import { useAuthStore } from 'src/stores/auth';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -159,7 +160,9 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError as Error, null);
 
-        // Очищаем токены при неудачной попытке обновления
+        // Очищаем токены и состояние при неудачной попытке обновления
+        const authStore = useAuthStore();
+        authStore.clearSession();
         setAccessToken(null);
         setRefreshToken(null);
 

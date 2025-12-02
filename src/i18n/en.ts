@@ -45,6 +45,10 @@ const en = {
       error: 'Registration error',
       loginLink: 'Sign in',
     },
+    common: {
+      email: 'Email',
+      password: 'Password',
+    },
     loggedOut: 'You have been logged out',
   },
   character: {
