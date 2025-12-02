@@ -57,13 +57,12 @@ export default {
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { SpellDetails, CharacterSpell } from 'src/interfaces';
+import type { SpellDetails } from 'src/interfaces';
 import { useLocalT } from 'src/composables/useLocaleT';
-import { useLocale } from 'src/composables/useLocale';
 
 interface Props {
   modelValue: boolean;
-  spell: SpellDetails | CharacterSpell | null;
+  spell: SpellDetails | null;
 }
 
 const props = defineProps<Props>();
@@ -73,99 +72,40 @@ defineEmits<{
 }>();
 
 const { t } = useLocalT();
-const { pickField } = useLocale();
-
-const isCharacterSpell = computed(() => {
-  return props.spell && 'nameRu' in props.spell;
-});
 
 const spellName = computed(() => {
-  if (!props.spell) return '';
-
-  if (isCharacterSpell.value) {
-    return pickField(props.spell as CharacterSpell, 'name');
-  }
-
-  return (props.spell as SpellDetails).name;
+  return props.spell?.name ?? '';
 });
 
 const spellSchool = computed(() => {
-  if (!props.spell) return '';
-
-  if (isCharacterSpell.value) {
-    return pickField(props.spell as CharacterSpell, 'school');
-  }
-
-  return (props.spell as SpellDetails).school;
+  return props.spell?.school ?? '';
 });
 
 const spellSource = computed(() => {
-  if (!props.spell) return '';
-
-  if (isCharacterSpell.value) {
-    return pickField(props.spell as CharacterSpell, 'source');
-  }
-
-  return (props.spell as SpellDetails).source;
+  return props.spell?.source ?? '';
 });
 
 const spellCastingTime = computed(() => {
-  if (!props.spell) return '';
-
-  if (isCharacterSpell.value) {
-    return pickField(props.spell as CharacterSpell, 'castingTime');
-  }
-
-  return (props.spell as SpellDetails).castingTime;
+  return props.spell?.castingTime ?? '';
 });
 
 const spellRange = computed(() => {
-  if (!props.spell) return '';
-
-  if (isCharacterSpell.value) {
-    return pickField(props.spell as CharacterSpell, 'range');
-  }
-
-  return (props.spell as SpellDetails).range;
+  return props.spell?.range ?? '';
 });
 
 const spellComponents = computed(() => {
-  if (!props.spell) return '';
-
-  if (isCharacterSpell.value) {
-    return pickField(props.spell as CharacterSpell, 'components');
-  }
-
-  return (props.spell as SpellDetails).components;
+  return props.spell?.components ?? '';
 });
 
 const spellDuration = computed(() => {
-  if (!props.spell) return '';
-
-  if (isCharacterSpell.value) {
-    return pickField(props.spell as CharacterSpell, 'duration');
-  }
-
-  return (props.spell as SpellDetails).duration;
+  return props.spell?.duration ?? '';
 });
 
 const spellText = computed(() => {
-  if (!props.spell) return '';
-
-  if (isCharacterSpell.value) {
-    return pickField(props.spell as CharacterSpell, 'text');
-  }
-
-  return (props.spell as SpellDetails).text;
+  return props.spell?.text ?? '';
 });
 
 const spellMaterials = computed(() => {
-  if (!props.spell) return '';
-
-  if (isCharacterSpell.value) {
-    return pickField(props.spell as CharacterSpell, 'materials');
-  }
-
-  return undefined;
+  return undefined; // SpellListItem не содержит materials
 });
 </script>

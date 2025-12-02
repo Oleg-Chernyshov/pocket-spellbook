@@ -111,31 +111,6 @@ export interface Character {
   spellSlots?: Record<string, number>;
 }
 
-export interface CharacterSpell {
-  id: number;
-  nameEn: string;
-  nameRu: string;
-  level: string;
-  textEn: string;
-  textRu: string;
-  schoolEn: string;
-  schoolRu: string;
-  castingTimeEn: string;
-  castingTimeRu: string;
-  rangeEn: string;
-  rangeRu: string;
-  materialsEn?: string;
-  materialsRu?: string;
-  componentsEn: string;
-  componentsRu: string;
-  durationEn: string;
-  durationRu: string;
-  sourceEn: string;
-  sourceRu: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface ClassSpellsStatsResponse {
   total: number;
   byLevel: Record<string, number>;

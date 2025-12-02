@@ -139,14 +139,14 @@ const canLearn = computed(() => {
 
 async function learn() {
   if (!character.active || !details.value) return;
-  await character.learnSpell(character.active.id, details.value.id);
+  await character.learnSpell(character.active.id, details.value.id, ui.language);
 
   $q.notify({ type: 'positive', message: t('spells.learned') });
 }
 
 async function forget() {
   if (!character.active || !details.value) return;
-  await character.forgetSpell(character.active.id, details.value.id);
+  await character.forgetSpell(character.active.id, details.value.id, ui.language);
 
   $q.notify({ type: 'warning', message: t('spells.forgotten') });
 }
@@ -179,6 +179,9 @@ watch(
 
     await spells.resetAndFetch();
     await spells.fetchCharacterClasses(newLang);
+    if (character.active) {
+      await character.loadSpells(character.active.id, newLang);
+    }
     suspendFilters.value = false;
   }
 );
@@ -191,7 +194,9 @@ onMounted(async () => {
     }
 
     if (auth.isAuthenticated && !character.active) {
-      await character.loadActive();
+      await character.loadActive(ui.language);
+    } else if (character.active) {
+      await character.loadSpells(character.active.id, ui.language);
     }
 
     if (character.active) {

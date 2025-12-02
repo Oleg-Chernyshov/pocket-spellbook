@@ -121,14 +121,14 @@
         <q-separator />
 
         <q-list>
-          <SpellListItem
+          <SpellListItemComponent
             v-for="s in character.spells"
             :key="s.id"
-            :name="pickField(s, 'name')"
+            :name="s.name"
             :level="s.level"
-            :school="pickField(s, 'school')"
-            :range="pickField(s, 'range')"
-            :casting-time="pickField(s, 'castingTime')"
+            :school="s.school"
+            :range="s.range"
+            :casting-time="s.castingTime"
             @click="openSpellDetails(s)"
           >
             <template #actions>
@@ -140,7 +140,7 @@
                 @click.stop="forget(s.id)"
               />
             </template>
-          </SpellListItem>
+          </SpellListItemComponent>
 
           <q-item v-if="!character.spells.length">
             <q-item-section>{{ t('common.empty') }}</q-item-section>
@@ -173,27 +173,25 @@ import { onMounted, ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCharacterStore } from 'src/stores/character';
 import { useSpellsStore } from 'src/stores/spells';
-import { type CharacterSpell } from 'src/interfaces';
+import { type SpellListItem } from 'src/interfaces';
 import { useQuasar } from 'quasar';
 import { useUiStore } from 'src/stores/ui';
-import { useLocale } from 'src/composables/useLocale';
 import { useLocalT } from 'src/composables/useLocaleT';
 
 import SpellDetailsDialog from 'src/components/Spells/SpellDetailsDialog.vue';
 import DeleteCharacterDialog from 'src/components/Character/DeleteCharacterDialog.vue';
-import SpellListItem from 'src/components/Spells/SpellListItem.vue';
+import SpellListItemComponent from 'src/components/Spells/SpellListItem.vue';
 import SpellSlots from 'src/components/Spells/SpellSlots.vue';
 
 const character = useCharacterStore();
 const spells = useSpellsStore();
 const ui = useUiStore();
 const { t } = useLocalT();
-const { pickField, isRu } = useLocale();
 const router = useRouter();
 const $q = useQuasar();
 
 const spellDialogOpen = ref(false);
-const selectedSpell = ref<CharacterSpell | null>(null);
+const selectedSpell = ref<SpellListItem | null>(null);
 const deleteDialogOpen = ref(false);
 const deleting = ref(false);
 
@@ -256,7 +254,7 @@ const spellSlots = ref<Record<string, number>>({
 
 const classOptions = computed(() =>
   spells.characterClasses.map((c) => ({
-    label: isRu.value ? `${pickField(c, 'title')} (${c.titleEn})` : c.titleEn,
+    label: ui.language === 'ru' ? `${c.titleRu} (${c.titleEn})` : c.titleEn,
     value: c.id,
   }))
 );
@@ -308,6 +306,9 @@ watch(
   () => ui.language,
   async (newLang) => {
     await spells.fetchCharacterClasses(newLang);
+    if (character.active) {
+      await character.loadSpells(character.active.id, newLang);
+    }
   }
 );
 
@@ -317,7 +318,9 @@ onMounted(async () => {
   }
 
   if (!character.active) {
-    await character.loadActive();
+    await character.loadActive(ui.language);
+  } else {
+    await character.loadSpells(character.active.id, ui.language);
   }
 
   loadCharacterData();
@@ -338,11 +341,14 @@ async function save() {
 
       $q.notify({ type: 'positive', message: t('character.saved') });
     } else {
-      await character.create({
-        name: name.value,
-        characterClassId: classId.value,
-        spellSlots: { ...spellSlots.value },
-      });
+      await character.create(
+        {
+          name: name.value,
+          characterClassId: classId.value,
+          spellSlots: { ...spellSlots.value },
+        },
+        ui.language
+      );
 
       $q.notify({ type: 'positive', message: t('character.created') });
     }
@@ -378,21 +384,21 @@ async function handleDelete() {
   }
 }
 
-function openSpellDetails(spell: CharacterSpell): void {
+function openSpellDetails(spell: SpellListItem): void {
   selectedSpell.value = spell;
   spellDialogOpen.value = true;
 }
 
 async function forget(spellId: number) {
   if (!character.active) return;
-  await character.forgetSpell(character.active.id, spellId);
+  await character.forgetSpell(character.active.id, spellId, ui.language);
   $q.notify({ type: 'warning', message: t('spells.forgotten') });
 }
 
 async function forgetFromDialog() {
   if (!character.active || !selectedSpell.value) return;
 
-  await character.forgetSpell(character.active.id, selectedSpell.value.id);
+  await character.forgetSpell(character.active.id, selectedSpell.value.id, ui.language);
 
   spellDialogOpen.value = false;
   selectedSpell.value = null;
