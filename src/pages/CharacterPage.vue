@@ -1,16 +1,26 @@
 <template>
   <q-page class="q-pa-md">
-    <div class="q-gutter-md">
-      <q-card>
-        <q-card-section class="flex justify-between">
-          <div class="text-h6">{{ t('character.title') }}</div>
-          <q-icon
-            name="settings"
-            class="cursor-pointer"
-            size="sm"
-            flat
-            @click="openSettings = !openSettings"
-          />
+    <div class="ps-shell ps-stack-md">
+      <q-card class="ps-glass">
+        <q-card-section class="row items-center justify-between q-col-gutter-sm">
+          <div class="col">
+            <div class="text-h6">{{ t('character.title') }}</div>
+            <div v-if="character.active" class="text-caption ps-subtle q-mt-xs">
+              {{ classOptions.find((c) => c.value === classId)?.label }}
+            </div>
+          </div>
+
+          <div class="col-auto">
+            <q-btn
+              class="ps-btn"
+              :class="{ 'ps-btn-secondary': openSettings }"
+              flat
+              dense
+              :icon="openSettings ? 'close' : 'edit'"
+              :label="settingsToggleLabel"
+              @click="openSettings = !openSettings"
+            />
+          </div>
         </q-card-section>
 
         <q-separator />
@@ -18,10 +28,6 @@
         <q-card-section v-if="!openSettings && character.active">
           <div class="text-subtitle1 q-mb-sm">
             <strong>{{ name }}</strong>
-          </div>
-
-          <div class="text-caption text-grey q-mb-md">
-            {{ classOptions.find((c) => c.value === classId)?.label }}
           </div>
 
           <SpellSlots
@@ -82,6 +88,7 @@
             <div class="row q-mt-md">
               <div class="col-12">
                 <q-btn
+                  class="ps-btn"
                   type="submit"
                   color="primary"
                   :label="character.active ? t('common.save') : t('common.create')"
@@ -89,9 +96,9 @@
                 />
 
                 <q-btn
+                  class="ps-btn q-ml-sm"
                   v-if="character.active"
                   color="negative"
-                  class="q-ml-sm"
                   :label="t('common.delete')"
                   @click="deleteDialogOpen = true"
                 />
@@ -101,15 +108,15 @@
         </q-card-section>
       </q-card>
 
-      <q-card v-if="character.active" class="q-mt-md">
+      <q-card v-if="character.active" class="q-mt-md ps-glass">
         <q-card-section>
           <div class="row items-center justify-between">
             <div class="text-h6">{{ t('character.learnedSpells') }}</div>
             <q-btn
+              class="ps-btn q-mt-sm-xs"
               color="primary"
               :label="t('character.toSpellList')"
               icon="menu_book"
-              class="q-mt-sm-xs"
               no-caps
               @click="router.push('/')"
             />
@@ -131,6 +138,7 @@
           >
             <template #actions>
               <q-btn
+                class="ps-btn"
                 dense
                 flat
                 color="negative"
@@ -150,6 +158,7 @@
     <SpellDetailsDialog v-model="spellDialogOpen" :spell="selectedSpell">
       <template #actions>
         <q-btn
+          class="ps-btn"
           color="negative"
           :label="t('spells.forget')"
           @click="forgetFromDialog"
@@ -270,6 +279,10 @@ const classOptions = computed(() =>
     label: ui.language === 'ru' ? (c.titleRu || c.titleEn) : c.titleEn,
     value: c.id,
   }))
+);
+
+const settingsToggleLabel = computed(() =>
+  openSettings.value ? t('common.close') : t('common.edit')
 );
 
 function toggleSlot(level: string, index: number): void {
@@ -406,5 +419,13 @@ async function forgetFromDialog() {
   @media (max-width: 600px) {
     margin-top: 10px;
   }
+}
+
+:deep(.q-card) {
+  border-radius: 18px;
+}
+
+:deep(.q-btn) {
+  border-radius: 12px;
 }
 </style>

@@ -1,6 +1,17 @@
 const ru = {
   app: {
     title: 'Pocket Spellbook',
+    slogan: 'Заклинания под рукой',
+    languageShort: 'RU',
+    actions: {
+      toggleTheme: 'Сменить тему',
+      language: 'Язык',
+    },
+    tooltips: {
+      darkMode: 'Темная тема',
+      lightMode: 'Светлая тема',
+      language: 'Язык',
+    },
   },
   nav: {
     spells: 'Заклинания',
@@ -14,6 +25,9 @@ const ru = {
     create: 'Создать',
     delete: 'Удалить',
     cancel: 'Отмена',
+    close: 'Закрыть',
+    edit: 'Редактировать',
+    reset: 'Сбросить',
     empty: 'Пока пусто',
     level: 'круг',
   },
@@ -23,6 +37,8 @@ const ru = {
     school: 'Школа',
     class: 'Класс',
     source: 'Источник',
+    collapse: 'Свернуть',
+    expand: 'Развернуть',
   },
   auth: {
     login: {
@@ -82,6 +98,8 @@ const ru = {
     forget: 'Забыть',
     learned: 'Заклинание выучено',
     forgotten: 'Заклинание забыто',
+    shownCount: 'Показано {shown} из {total}',
+    filtersCount: 'Фильтры: {count}',
   },
   details: {
     level: 'круг',

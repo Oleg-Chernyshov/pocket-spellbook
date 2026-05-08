@@ -1,6 +1,17 @@
 const en = {
   app: {
     title: 'Pocket Spellbook',
+    slogan: 'Spells at your fingertips',
+    languageShort: 'EN',
+    actions: {
+      toggleTheme: 'Toggle theme',
+      language: 'Language',
+    },
+    tooltips: {
+      darkMode: 'Dark mode',
+      lightMode: 'Light mode',
+      language: 'Language',
+    },
   },
   nav: {
     spells: 'Spells',
@@ -14,6 +25,9 @@ const en = {
     create: 'Create',
     delete: 'Delete',
     cancel: 'Cancel',
+    close: 'Close',
+    edit: 'Edit',
+    reset: 'Reset',
     empty: 'Empty for now',
     level: 'circle',
   },
@@ -23,6 +37,8 @@ const en = {
     school: 'School',
     class: 'Class',
     source: 'Source',
+    collapse: 'Collapse',
+    expand: 'Expand',
   },
   auth: {
     login: {
@@ -82,6 +98,8 @@ const en = {
     forget: 'Forget',
     learned: 'Spell learned',
     forgotten: 'Spell forgotten',
+    shownCount: 'Showing {shown} of {total}',
+    filtersCount: 'Filters: {count}',
   },
   details: {
     level: 'circle',

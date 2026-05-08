@@ -3,8 +3,8 @@
     :model-value="modelValue"
     @update:model-value="$emit('update:modelValue', $event)"
   >
-    <q-card style="max-width: 640px; width: 100%">
-      <q-card-section>
+    <q-card class="ps-glass spell-dialog-card">
+      <q-card-section class="spell-dialog-content">
         <div class="flex justify-between items-start">
           <div>
             <div class="text-h6">{{ normalizedName(spell?.name) }}</div>
@@ -74,3 +74,16 @@ const sanitizedText = (text: string | undefined) => {
   });
 }
 </script>
+
+<style scoped>
+.spell-dialog-card {
+  max-width: 720px;
+  width: min(720px, 96vw);
+  border-radius: 18px;
+}
+
+.spell-dialog-content {
+  max-height: 65vh;
+  overflow-y: auto;
+}
+</style>

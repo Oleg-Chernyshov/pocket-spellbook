@@ -34,22 +34,19 @@
       />
 
       <template #alt>
-        <q-btn flat to="/login" :label="t('auth.register.loginLink')" />
+        <q-btn class="ps-btn" flat to="/login" :label="t('auth.register.loginLink')" />
       </template>
     </AuthCard>
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, defineAsyncComponent } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from 'src/stores/auth';
 import { useQuasar } from 'quasar';
 import { useLocalT } from 'src/composables/useLocaleT';
-
-const AuthCard = defineAsyncComponent(
-  () => import('src/components/Auth/AuthCard.vue')
-);
+import AuthCard from 'src/components/Auth/AuthCard.vue';
 
 const name = ref('');
 const email = ref('');

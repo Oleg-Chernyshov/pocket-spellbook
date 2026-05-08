@@ -1,8 +1,30 @@
 <template>
   <q-page class="q-pa-md spells-page" :style-fn="pageStyle">
-    <div class="q-gutter-md spells-page-content">
+    <div class="spells-page-content ps-shell ps-stack-md">
+      <div class="ps-glass q-pa-md spells-summary">
+        <div class="row items-center justify-between q-col-gutter-md">
+          <div class="col">
+            <div class="text-h5 text-weight-bold">{{ t('nav.spells') }}</div>
+            <div class="text-caption ps-subtle q-mt-xs">
+              {{ subtitle }}
+            </div>
+          </div>
+          <div class="col-auto row items-center q-gutter-sm">
+            <q-chip
+              color="primary"
+              text-color="white"
+              icon="filter_alt"
+              :label="activeFiltersLabel"
+            />
+          </div>
+        </div>
+      </div>
+
       <SpellFilters
         :search="search"
+        :language="ui.language"
+        :class-options="classOptions"
+        :collapsed="filtersCollapsed"
         :level="level"
         :school="school"
         :character-class="characterClass"
@@ -12,9 +34,11 @@
         @update:school="(v) => (school = v)"
         @update:characterClass="(v) => (characterClass = v)"
         @update:source="(v) => (source = v)"
+        @update:collapsed="(v) => (filtersCollapsed = v)"
+        @reset="resetFilters"
       />
 
-      <div ref="spellsListScrollRef" class="spells-list-scroll">
+      <div ref="spellsListScrollRef" class="spells-list-scroll ps-glass">
         <q-list separator>
           <q-infinite-scroll
             @load="onLoad"
@@ -30,8 +54,13 @@
                 :casting-time="spell.castingTime"
                 @click="openSpell(spell.id)"
               />
-              <q-separator />
             </template>
+
+            <q-item v-if="!items.length && spells.fetchState === 'idle'">
+              <q-item-section class="q-pa-lg text-center">
+                <div class="text-subtitle1">{{ t('common.empty') }}</div>
+              </q-item-section>
+            </q-item>
 
             <template #loading>
               <div class="row justify-center q-my-md">
@@ -46,6 +75,7 @@
     <SpellDetailsDialog v-model="dialogOpen" :spell="details">
       <template #actions>
         <q-btn
+          class="ps-btn"
           v-if="!character.active"
           color="primary"
           :label="t('spells.createCharacter')"
@@ -53,6 +83,7 @@
           @click="router.push('/character')"
         />
         <q-btn
+          class="ps-btn"
           v-else
           :color="!canLearn ? 'negative' : 'primary'"
           :label="!canLearn ? t('spells.forget') : t('spells.learn')"
@@ -101,15 +132,38 @@ const source = ref<SourceBook | undefined>(spells.source);
 const spellsListScrollRef = ref<HTMLElement | null>(null);
 
 const items = computed(() => spells.items);
+const classOptions = computed(() =>
+  spells.spellcasterClasses.map((c) => ({
+    label: ui.language === 'ru' ? c.titleRu : c.titleEn,
+    value: c.id,
+  }))
+);
 const suspendFilters = ref(false);
+const filtersCollapsed = ref($q.screen.lt.md);
+const activeFiltersCount = computed(() => {
+  let count = 0;
+  if (search.value.trim().length) count += 1;
+  if (level.value !== undefined) count += 1;
+  if (school.value !== undefined) count += 1;
+  if (characterClass.value !== undefined) count += 1;
+  if (source.value !== undefined) count += 1;
+  return count;
+});
+const subtitle = computed(() =>
+  t('spells.shownCount', {
+    shown: items.value.length,
+    total: spells.total,
+  })
+);
+const activeFiltersLabel = computed(() =>
+  t('spells.filtersCount', { count: activeFiltersCount.value })
+);
 
 function pageStyle(offset: number, height: number): Record<string, string> {
   return {
     height: `${Math.max(0, height - offset)}px`,
   };
 }
-
-spells.setLanguage(ui.language);
 
 const isSpellcasterClass = (classId: number): boolean => {
   return spells.spellcasterClasses.some((sc) => sc.id === classId);
@@ -165,6 +219,14 @@ async function forget() {
   await character.forgetSpell(character.active.id, details.value.id, ui.language);
 
   $q.notify({ type: 'warning', message: t('spells.forgotten') });
+}
+
+function resetFilters() {
+  search.value = '';
+  level.value = undefined;
+  school.value = undefined;
+  characterClass.value = undefined;
+  source.value = undefined;
 }
 
 watch(
@@ -250,5 +312,58 @@ onMounted(async () => {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  border-radius: 18px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(59, 130, 246, 0.6) rgba(148, 163, 184, 0.2);
+}
+
+.spells-list-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.spells-list-scroll::-webkit-scrollbar-track {
+  background: rgba(148, 163, 184, 0.16);
+  border-radius: 999px;
+}
+
+.spells-list-scroll::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #60a5fa, #2563eb);
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.65);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.spells-list-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+}
+
+.spells-list-scroll::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, #2563eb, #1e40af);
+}
+
+.body--dark .spells-list-scroll::-webkit-scrollbar-track {
+  background: rgba(148, 163, 184, 0.2);
+}
+
+.body--dark .spells-list-scroll::-webkit-scrollbar-thumb {
+  border-color: rgba(15, 23, 42, 0.7);
+}
+
+.body--dark .spells-list-scroll::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #60a5fa, #2563eb);
+}
+
+.body--dark .spells-list-scroll::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(180deg, #3b82f6, #1d4ed8);
+}
+
+.spells-list-scroll :deep(.q-list) {
+  padding: 6px;
+}
+
+@media (max-width: 768px) {
+  .spells-summary {
+    display: none;
+  }
 }
 </style>
