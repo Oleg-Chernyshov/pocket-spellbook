@@ -21,7 +21,7 @@ export default boot(({ app }) => {
 
   const ui = useUiStore();
 
-  // Apply UI language synchronously
+  // Применяем язык UI синхронно
   i18n.global.locale.value = ui.language;
   Quasar.lang.set(ui.language === 'ru' ? ruRU : enUS);
 

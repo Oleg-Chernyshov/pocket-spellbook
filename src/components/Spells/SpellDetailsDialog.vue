@@ -7,10 +7,9 @@
       <q-card-section>
         <div class="flex justify-between items-start">
           <div>
-            <div class="text-h6">{{ spellName }}</div>
+            <div class="text-h6">{{ normalizedName(spell?.name) }}</div>
             <div class="text-caption text-grey">
-              {{ spellSchool }} • {{ t('common.level') }} {{ spell?.level }} •
-              {{ spellSource }}
+              {{ normalizedName(spell?.school) }} • {{ t('common.level') }} {{ normalizedName(spell?.level) }} • {{ normalizedName(spell?.source) }}
             </div>
           </div>
           <q-btn flat dense round icon="close" v-close-popup />
@@ -21,23 +20,18 @@
 
       <q-card-section>
         <div class="q-mb-sm">
-          <b>{{ t('details.castingTime') }}:</b> {{ spellCastingTime }}
+          <b>{{ t('details.castingTime') }}:</b> {{ normalizedName(spell?.castingTime) }}
         </div>
         <div class="q-mb-sm">
-          <b>{{ t('details.range') }}:</b> {{ spellRange }}
+          <b>{{ t('details.range') }}:</b> {{ normalizedName(spell?.range) }}
         </div>
         <div class="q-mb-sm">
-          <b>{{ t('details.components') }}:</b> {{ spellComponents }}
+          <b>{{ t('details.components') }}:</b> {{ normalizedName(spell?.components) }}
         </div>
-
-        <div v-if="spellMaterials" class="q-mb-sm">
-          <b>{{ t('details.materials') }}:</b> {{ spellMaterials }}
-        </div>
-
         <div class="q-mb-sm">
-          <b>{{ t('details.duration') }}:</b> {{ spellDuration }}
+          <b>{{ t('details.duration') }}:</b> {{ normalizedName(spell?.duration) }}
         </div>
-        <div style="white-space: pre-wrap" v-html="spellText"></div>
+        <div style="white-space: pre-wrap" v-html="sanitizedText(spell?.text)"></div>
       </q-card-section>
 
       <q-separator />
@@ -49,23 +43,19 @@
   </q-dialog>
 </template>
 
-<script lang="ts">
-export default {
-  name: 'SpellDetailsDialog',
-};
-</script>
-
 <script setup lang="ts">
-import { computed } from 'vue';
 import type { SpellDetails } from 'src/interfaces';
 import { useLocalT } from 'src/composables/useLocaleT';
+import DOMPurify from 'dompurify';
+
+defineOptions({ name: 'SpellDetailsDialog' })
 
 interface Props {
   modelValue: boolean;
   spell: SpellDetails | null;
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 defineEmits<{
   'update:modelValue': [value: boolean];
@@ -73,39 +63,14 @@ defineEmits<{
 
 const { t } = useLocalT();
 
-const spellName = computed(() => {
-  return props.spell?.name ?? '';
-});
+const normalizedName = (name: string | undefined) => {
+  return name ?? '';
+}
 
-const spellSchool = computed(() => {
-  return props.spell?.school ?? '';
-});
-
-const spellSource = computed(() => {
-  return props.spell?.source ?? '';
-});
-
-const spellCastingTime = computed(() => {
-  return props.spell?.castingTime ?? '';
-});
-
-const spellRange = computed(() => {
-  return props.spell?.range ?? '';
-});
-
-const spellComponents = computed(() => {
-  return props.spell?.components ?? '';
-});
-
-const spellDuration = computed(() => {
-  return props.spell?.duration ?? '';
-});
-
-const spellText = computed(() => {
-  return props.spell?.text ?? '';
-});
-
-const spellMaterials = computed(() => {
-  return undefined; // SpellListItem не содержит materials
-});
+const sanitizedText = (text: string | undefined) => {
+  return DOMPurify.sanitize(text ?? '', {
+    ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 's', 'br', 'p', 'ul', 'ol', 'li'],
+    ALLOWED_ATTR: [],
+  });
+}
 </script>

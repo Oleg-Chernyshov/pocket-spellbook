@@ -84,9 +84,7 @@
                 <q-btn
                   type="submit"
                   color="primary"
-                  :label="
-                    character.active ? t('common.save') : t('common.create')
-                  "
+                  :label="character.active ? t('common.save') : t('common.create')"
                   :loading="saving"
                 />
 
@@ -197,6 +195,20 @@ const deleting = ref(false);
 
 const USED_SLOTS_STORAGE_KEY = 'ps_used_spell_slots';
 
+onMounted(async () => {
+  if (spells.characterClasses.length === 0) {
+    await spells.fetchCharacterClasses();
+  }
+
+  if (!character.active) {
+    await character.loadActive(ui.language);
+  } else {
+    await character.loadSpells(character.active.id, ui.language);
+  }
+
+  loadCharacterData();
+});
+
 function loadUsedSlotsFromStorage(
   characterId: number
 ): Record<string, boolean[]> {
@@ -240,6 +252,7 @@ const classId = ref<number | null>(null);
 const saving = ref(false);
 const openSettings = ref(false);
 const usedSlots = ref<Record<string, boolean[]>>(createEmptyUsedSlots());
+
 const spellSlots = ref<Record<string, number>>({
   '1': 0,
   '2': 0,
@@ -254,7 +267,7 @@ const spellSlots = ref<Record<string, number>>({
 
 const classOptions = computed(() =>
   spells.characterClasses.map((c) => ({
-    label: ui.language === 'ru' ? `${c.titleRu} (${c.titleEn})` : c.titleEn,
+    label: ui.language === 'ru' ? (c.titleRu || c.titleEn) : c.titleEn,
     value: c.id,
   }))
 );
@@ -295,15 +308,9 @@ function loadCharacterData(): void {
   }
 }
 
-watch(
-  () => character.active,
-  () => {
-    loadCharacterData();
-  }
-);
+watch(() => character.active, loadCharacterData);
 
-watch(
-  () => ui.language,
+watch(() => ui.language,
   async (newLang) => {
     await spells.fetchCharacterClasses(newLang);
     if (character.active) {
@@ -311,20 +318,6 @@ watch(
     }
   }
 );
-
-onMounted(async () => {
-  if (spells.characterClasses.length === 0) {
-    await spells.fetchCharacterClasses();
-  }
-
-  if (!character.active) {
-    await character.loadActive(ui.language);
-  } else {
-    await character.loadSpells(character.active.id, ui.language);
-  }
-
-  loadCharacterData();
-});
 
 async function save() {
   if (!name.value || !classId.value) return;
@@ -391,6 +384,7 @@ function openSpellDetails(spell: SpellListItem): void {
 
 async function forget(spellId: number) {
   if (!character.active) return;
+
   await character.forgetSpell(character.active.id, spellId, ui.language);
   $q.notify({ type: 'warning', message: t('spells.forgotten') });
 }

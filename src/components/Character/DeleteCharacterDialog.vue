@@ -11,8 +11,7 @@
       <q-card-section class="q-pt-none">
         <p class="text-body1">
           {{ t('character.deleteDialog.text1') }}
-          <strong>{{ characterName }}</strong
-          >?
+          <strong>{{ characterName }}</strong>?
         </p>
         <p class="text-body2 text-grey-7">
           {{ t('character.deleteDialog.irreversible') }}
@@ -45,6 +44,7 @@ interface Props {
   loading?: boolean;
 }
 
+defineOptions({ name: 'DeleteCharacterDialog' })
 defineProps<Props>();
 
 const emit = defineEmits<{
@@ -57,10 +57,4 @@ const { t } = useLocalT();
 function handleDelete() {
   emit('delete');
 }
-</script>
-
-<script lang="ts">
-export default {
-  name: 'DeleteCharacterDialog',
-};
 </script>

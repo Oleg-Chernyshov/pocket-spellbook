@@ -39,7 +39,9 @@
             :to="{ name: 'spells' }"
             active-class="text-primary"
           >
-            <q-item-section avatar><q-icon name="menu_book" /></q-item-section>
+            <q-item-section avatar>
+              <q-icon name="menu_book" />
+            </q-item-section>
             <q-item-section>{{ t('nav.spells') }}</q-item-section>
           </q-item>
 

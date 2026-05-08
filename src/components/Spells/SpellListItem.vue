@@ -9,9 +9,11 @@
         {{ school }} • {{ range }} • {{ castingTime }}
       </div>
     </q-item-section>
+
     <q-item-section v-if="$slots.actions" side top>
       <slot name="actions" />
     </q-item-section>
+
     <q-item-section v-else side top>
       <q-icon name="chevron_right" />
     </q-item-section>
@@ -31,16 +33,11 @@ interface Props {
   castingTime: string;
 }
 
+defineOptions({ name: 'SpellListItem' })
 defineProps<Props>();
 defineEmits<{
   (e: 'click'): void;
 }>();
 
 const levelLabel = computed(() => t('common.level'));
-</script>
-
-<script lang="ts">
-export default {
-  name: 'SpellListItem',
-};
 </script>

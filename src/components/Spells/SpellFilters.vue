@@ -76,39 +76,40 @@
 
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import { useLocale } from 'src/composables/useLocale';
 import { useSpellsStore } from 'src/stores/spells';
 import { useLocalT } from 'src/composables/useLocaleT';
 import {
+  SOURCE_BOOKS,
+  SPELL_LEVELS,
+  SPELL_SCHOOLS,
   type SpellLevel,
   type SpellSchool,
+  type SpellSchoolFilterValue,
   type SourceBook,
 } from 'src/interfaces';
 
 interface Props {
   search: string;
   level?: SpellLevel;
-  school?: SpellSchool;
+  school?: SpellSchoolFilterValue;
   characterClass?: number;
   source?: SourceBook;
 }
 
+defineOptions({ name: 'SpellFilters' })
 defineProps<Props>();
+
 const emit = defineEmits<{
   (e: 'update:search', v: string): void;
   (e: 'update:level', v: SpellLevel | undefined): void;
-  (e: 'update:school', v: SpellSchool | undefined): void;
+  (e: 'update:school', v: SpellSchoolFilterValue | undefined): void;
   (e: 'update:characterClass', v: number | undefined): void;
   (e: 'update:source', v: SourceBook | undefined): void;
 }>();
 
 const spellsStore = useSpellsStore();
 const { t } = useLocalT();
-const { pick, isRu } = useLocale();
-
-function onSearchUpdate(v: string | number | null) {
-  emit('update:search', v?.toString() || '');
-}
+const isRu = computed(() => spellsStore.language === 'ru');
 
 onMounted(() => {
   if (spellsStore.characterClasses.length === 0) {
@@ -116,32 +117,27 @@ onMounted(() => {
   }
 });
 
-const levels = [
-  { label: '0', value: '0' },
-  { label: '1', value: '1' },
-  { label: '2', value: '2' },
-  { label: '3', value: '3' },
-  { label: '4', value: '4' },
-  { label: '5', value: '5' },
-  { label: '6', value: '6' },
-  { label: '7', value: '7' },
-  { label: '8', value: '8' },
-  { label: '9', value: '9' },
-] as const;
+function onSearchUpdate(v: string | number | null) {
+  emit('update:search', v?.toString() || '');
+}
+
+const SCHOOL_LABELS_RU: Record<SpellSchool, string> = {
+  Abjuration: 'Ограждение',
+  Conjuration: 'Вызов',
+  Divination: 'Прорицание',
+  Enchantment: 'Очарование',
+  Evocation: 'Воплощение',
+  Illusion: 'Иллюзия',
+  Necromancy: 'Некромантия',
+  Transmutation: 'Преобразование',
+};
+
+const levels = SPELL_LEVELS.map((level) => ({ label: level, value: level }));
 
 const schools = computed(() =>
-  [
-    { enName: 'Abjuration', ruName: 'Ограждение' },
-    { enName: 'Divination', ruName: 'Прорицание' },
-    { enName: 'Enchantment', ruName: 'Очарование' },
-    { enName: 'Evocation', ruName: 'Воплощение' },
-    { enName: 'Conjuration', ruName: 'Вызов' },
-    { enName: 'Illusion', ruName: 'Иллюзия' },
-    { enName: 'Necromancy', ruName: 'Некромантия' },
-    { enName: 'Transmutation', ruName: 'Преобразование' },
-  ].map((s) => ({
-    label: pick(s.ruName, s.enName),
-    value: pick(s.ruName, s.enName),
+  SPELL_SCHOOLS.map((school) => ({
+    label: isRu.value ? SCHOOL_LABELS_RU[school] : school,
+    value: isRu.value ? SCHOOL_LABELS_RU[school] : school,
   }))
 );
 
@@ -152,20 +148,5 @@ const classOptions = computed(() =>
   }))
 );
 
-const sources = [
-  'PHB',
-  'AI',
-  'FTD',
-  'SCPC',
-  'TCoE',
-  'TOEE',
-  'XGTE',
-  'TOEE, XGTE',
-].map((s) => ({ label: s, value: s }));
-</script>
-
-<script lang="ts">
-export default {
-  name: 'SpellFilters',
-};
+const sources = SOURCE_BOOKS.map((source) => ({ label: source, value: source }));
 </script>

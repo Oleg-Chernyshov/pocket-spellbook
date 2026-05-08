@@ -29,6 +29,7 @@ interface Props {
   maxWidth?: number;
 }
 
+defineOptions({ name: 'AuthCard' })
 const props = defineProps<Props>();
 const emit = defineEmits<{ (e: 'submit'): void }>();
 
@@ -40,10 +41,4 @@ const maxWidthStyle = computed(() => ({
 function onSubmit() {
   emit('submit');
 }
-</script>
-
-<script lang="ts">
-export default {
-  name: 'AuthCard',
-};
 </script>

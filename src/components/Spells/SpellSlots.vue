@@ -40,15 +40,10 @@ interface Props {
   usedSlots: Record<string, boolean[]>;
 }
 
+defineOptions({ name: 'SpellSlots' })
 defineProps<Props>();
 defineEmits<{
   (e: 'toggle-slot', level: string, index: number): void;
   (e: 'reset-all'): void;
 }>();
-</script>
-
-<script lang="ts">
-export default {
-  name: 'SpellSlots',
-};
 </script>

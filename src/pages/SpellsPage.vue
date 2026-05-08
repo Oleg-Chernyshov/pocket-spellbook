@@ -1,6 +1,6 @@
 <template>
-  <q-page class="q-pa-md">
-    <div class="q-gutter-md">
+  <q-page class="q-pa-md spells-page" :style-fn="pageStyle">
+    <div class="q-gutter-md spells-page-content">
       <SpellFilters
         :search="search"
         :level="level"
@@ -14,9 +14,13 @@
         @update:source="(v) => (source = v)"
       />
 
-      <div>
+      <div ref="spellsListScrollRef" class="spells-list-scroll">
         <q-list separator>
-          <q-infinite-scroll @load="onLoad" :offset="250">
+          <q-infinite-scroll
+            @load="onLoad"
+            :offset="250"
+            :scroll-target="spellsListScrollRef ?? undefined"
+          >
             <template v-for="spell in items" :key="spell.id">
               <SpellListItem
                 :name="spell.name"
@@ -66,7 +70,7 @@ import { useSpellsStore } from 'src/stores/spells';
 import { useCharacterStore } from 'src/stores/character';
 import {
   type SpellLevel,
-  type SpellSchool,
+  type SpellSchoolFilterValue,
   type SourceBook,
 } from 'src/interfaces';
 import { useQuasar } from 'quasar';
@@ -91,12 +95,19 @@ const { dialogOpen, details, loadSpellDetails } = useSpellDetails();
 
 const search = ref(spells.search);
 const level = ref<SpellLevel | undefined>(spells.level);
-const school = ref<SpellSchool | undefined>(spells.school);
+const school = ref<SpellSchoolFilterValue | undefined>(spells.school);
 const characterClass = ref<number | undefined>(spells.characterClass);
 const source = ref<SourceBook | undefined>(spells.source);
+const spellsListScrollRef = ref<HTMLElement | null>(null);
 
 const items = computed(() => spells.items);
 const suspendFilters = ref(false);
+
+function pageStyle(offset: number, height: number): Record<string, string> {
+  return {
+    height: `${Math.max(0, height - offset)}px`,
+  };
+}
 
 spells.setLanguage(ui.language);
 
@@ -104,7 +115,7 @@ const isSpellcasterClass = (classId: number): boolean => {
   return spells.spellcasterClasses.some((sc) => sc.id === classId);
 };
 
-async function onLoad(index: number, done: () => void) {
+async function onLoad(_index: number, done: () => void) {
   try {
     await spells.fetchNext();
   } finally {
@@ -114,6 +125,7 @@ async function onLoad(index: number, done: () => void) {
 
 watch([search, level, school, characterClass, source], async () => {
   if (suspendFilters.value) return;
+
   spells.setFilters({
     search: search.value,
     level: level.value,
@@ -131,14 +143,17 @@ function openSpell(id: number) {
 
 const canLearn = computed(() => {
   if (!character.active || !details.value) return false;
+
   const targetId = details.value?.id;
 
   if (!targetId) return false;
+
   return !character.spells.some((s) => s.id === targetId);
 });
 
 async function learn() {
   if (!character.active || !details.value) return;
+
   await character.learnSpell(character.active.id, details.value.id, ui.language);
 
   $q.notify({ type: 'positive', message: t('spells.learned') });
@@ -146,6 +161,7 @@ async function learn() {
 
 async function forget() {
   if (!character.active || !details.value) return;
+
   await character.forgetSpell(character.active.id, details.value.id, ui.language);
 
   $q.notify({ type: 'warning', message: t('spells.forgotten') });
@@ -189,6 +205,7 @@ watch(
 onMounted(async () => {
   try {
     spells.setLanguage(ui.language);
+
     if (spells.characterClasses.length === 0) {
       await spells.fetchCharacterClasses();
     }
@@ -217,3 +234,21 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style scoped>
+.spells-page {
+  overflow: hidden;
+}
+
+.spells-page-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.spells-list-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+</style>

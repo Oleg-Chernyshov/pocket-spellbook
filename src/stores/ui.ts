@@ -1,17 +1,14 @@
 import { defineStore } from 'pinia';
 import type { LanguageCode } from 'src/interfaces';
-
-const LANGUAGE_STORAGE_KEY = 'ps_language';
+import { safeGetItem, safeSetItem, STORAGE_KEYS } from 'src/utils/storage';
 
 function getStoredLanguage(): LanguageCode {
-  try {
-    const stored = localStorage.getItem(LANGUAGE_STORAGE_KEY);
-    if (stored === 'en' || stored === 'ru') {
-      return stored;
-    }
-  } catch {
-    // ignore storage errors
+  const stored = safeGetItem(STORAGE_KEYS.language);
+
+  if (stored === 'en' || stored === 'ru') {
+    return stored;
   }
+
   return (process.env.DEFAULT_LANGUAGE as LanguageCode) || 'ru';
 }
 
@@ -43,11 +40,7 @@ export const useUiStore = defineStore('ui', {
 
     setLanguage(lang: LanguageCode): void {
       this.language = lang;
-      try {
-        localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
-      } catch {
-        // ignore storage errors
-      }
+      safeSetItem(STORAGE_KEYS.language, lang);
     },
   },
 });

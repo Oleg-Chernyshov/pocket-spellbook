@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { api } from 'boot/axios';
+
 import type {
   Character,
   CreateCharacterDto,
@@ -7,6 +7,16 @@ import type {
   SpellListItem,
   LanguageCode,
 } from 'src/interfaces';
+
+import {
+  getCharacters as getCharactersRequest,
+  createCharacter as createCharacterRequest,
+  updateCharacter as updateCharacterRequest,
+  deleteCharacter as deleteCharacterRequest,
+  getSpells as getSpellsRequest,
+  learnSpell as learnSpellRequest,
+  forgetSpell as forgetSpellRequest,
+} from 'src/services/character.service';
 
 export const useCharacterStore = defineStore('character', {
   state: () => ({
@@ -19,48 +29,42 @@ export const useCharacterStore = defineStore('character', {
       this.isLoading = true;
 
       try {
-        const { data } = await api.get<Character[]>('/characters');
-        this.active = data[0] || null;
-        if (this.active) await this.loadSpells(this.active.id, language);
+        this.active = (await getCharactersRequest())[0] || null;
+
+        if (this.active) 
+          await this.loadSpells(this.active.id, language);
       } finally {
         this.isLoading = false;
       }
     },
 
     async create(dto: CreateCharacterDto, language?: LanguageCode): Promise<void> {
-      const { data } = await api.post<Character>('/characters', dto);
-      this.active = data;
-      await this.loadSpells(data.id, language);
+      this.active = await createCharacterRequest(dto);
+
+      await this.loadSpells(this.active.id, language);
     },
 
     async update(id: number, dto: UpdateCharacterDto): Promise<void> {
-      const { data } = await api.put<Character>(`/characters/${id}`, dto);
-      this.active = data;
+      this.active = await updateCharacterRequest(id, dto);
     },
 
     async remove(id: number): Promise<void> {
-      await api.delete(`/characters/${id}`);
+      await deleteCharacterRequest(id);
       this.active = null;
       this.spells = [];
     },
 
     async loadSpells(id: number, language?: LanguageCode): Promise<void> {
-      const { data } = await api.get<SpellListItem[]>(
-        `/characters/${id}/spells`,
-        {
-          params: language ? { language } : undefined,
-        }
-      );
-      this.spells = data;
+      this.spells = await getSpellsRequest(id, language);
     },
 
     async learnSpell(id: number, spellId: number, language?: LanguageCode): Promise<void> {
-      await api.post(`/characters/${id}/spells/${spellId}`);
+      await learnSpellRequest(id, spellId);
       await this.loadSpells(id, language);
     },
 
     async forgetSpell(id: number, spellId: number, language?: LanguageCode): Promise<void> {
-      await api.delete(`/characters/${id}/spells/${spellId}`);
+      await forgetSpellRequest(id, spellId);
       await this.loadSpells(id, language);
     },
   },

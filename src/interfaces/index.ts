@@ -14,34 +14,62 @@ export interface PaginatedResponse<T> {
   pagination: PaginationMeta;
 }
 
-export type SpellLevel =
-  | '0'
-  | '1'
-  | '2'
-  | '3'
-  | '4'
-  | '5'
-  | '6'
-  | '7'
-  | '8'
-  | '9';
+export const SPELL_LEVELS = [
+  '0',
+  '1',
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+ ] as const;
 
-export type SpellSchool =
-  | 'Abjuration'
-  | 'Conjuration'
-  | 'Divination'
-  | 'Enchantment'
-  | 'Evocation'
-  | 'Illusion'
-  | 'Necromancy'
-  | 'Transmutation';
+export type SpellLevel = (typeof SPELL_LEVELS)[number];
 
-export type SourceBook = 'PHB' | 'XGE' | 'TCE' | 'FTD' | 'EGW';
+export const SPELL_SCHOOLS = [
+  'Abjuration',
+  'Conjuration',
+  'Divination',
+  'Enchantment',
+  'Evocation',
+  'Illusion',
+  'Necromancy',
+  'Transmutation',
+ ] as const;
+
+export type SpellSchool = (typeof SPELL_SCHOOLS)[number];
+
+export const SPELL_SCHOOL_LABELS_RU = {
+  Abjuration: 'Ограждение',
+  Conjuration: 'Вызов',
+  Divination: 'Прорицание',
+  Enchantment: 'Очарование',
+  Evocation: 'Воплощение',
+  Illusion: 'Иллюзия',
+  Necromancy: 'Некромантия',
+  Transmutation: 'Преобразование',
+} as const satisfies Record<SpellSchool, string>;
+
+export type SpellSchoolRu = (typeof SPELL_SCHOOL_LABELS_RU)[SpellSchool];
+export type SpellSchoolFilterValue = SpellSchool | SpellSchoolRu;
+
+export const SOURCE_BOOKS = [
+  'PHB',
+  'XGE',
+  'TCE',
+  'FTD',
+  'EGW',
+] as const;
+
+export type SourceBook = (typeof SOURCE_BOOKS)[number];
 
 export interface SpellListItem {
   id: number;
   name: string;
-  level: SpellLevel | string; // API returns strings for level
+  level: SpellLevel | string;
   school: SpellSchool;
   text: string;
   castingTime: string;
@@ -58,7 +86,7 @@ export interface SpellsQuery {
   limit?: number;
   search?: string;
   level?: SpellLevel;
-  school?: SpellSchool;
+  school?: SpellSchoolFilterValue;
   characterClass?: number;
   language?: LanguageCode;
   source?: SourceBook;
@@ -85,6 +113,8 @@ export interface RegisterRequest {
   password: string;
   name: string;
 }
+
+export type RegisterResponse = User;
 
 export interface User {
   id: number;

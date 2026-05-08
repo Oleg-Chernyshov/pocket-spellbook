@@ -8,6 +8,13 @@ import { Router } from 'vue-router';
 import { Notify } from 'quasar';
 import { i18n } from './i18n';
 import { useAuthStore } from 'src/stores/auth';
+import type { AuthRefreshResponse } from 'src/interfaces';
+import { refreshTokens as refreshTokensRequest } from 'src/services/auth.service';
+import {
+  safeGetItem,
+  safeSetOrRemoveItem,
+  STORAGE_KEYS,
+} from 'src/utils/storage';
 
 declare module '@vue/runtime-core' {
   interface ComponentCustomProperties {
@@ -20,60 +27,36 @@ const api = axios.create({ baseURL: apiBaseURL });
 
 let router: Router;
 
-const ACCESS_TOKEN_STORAGE_KEY = 'ps_access_token';
-const REFRESH_TOKEN_STORAGE_KEY = 'ps_refresh_token';
-
 function getAccessToken(): string | null {
-  try {
-    return localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
-  } catch {
-    return null;
-  }
+  return safeGetItem(STORAGE_KEYS.accessToken);
 }
 
 function setAccessToken(token: string | null): void {
-  try {
-    if (token) {
-      localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
-    } else {
-      localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
-    }
-  } catch {
-    // ignore storage errors
-  }
+  safeSetOrRemoveItem(STORAGE_KEYS.accessToken, token);
 }
 
 function getRefreshToken(): string | null {
-  try {
-    return localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-  } catch {
-    return null;
-  }
+  return safeGetItem(STORAGE_KEYS.refreshToken);
 }
 
 function setRefreshToken(token: string | null): void {
-  try {
-    if (token) {
-      localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, token);
-    } else {
-      localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
-    }
-  } catch {
-    // ignore storage errors
-  }
+  safeSetOrRemoveItem(STORAGE_KEYS.refreshToken, token);
 }
 
 api.interceptors.request.use((config) => {
   const token = getAccessToken();
+
   if (token) {
     config.headers = config.headers ?? {};
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
 // Refresh token flow
 let isRefreshing = false;
+
 let failedQueue: Array<{
   resolve: (value?: unknown) => void;
   reject: (reason?: unknown) => void;
@@ -91,27 +74,20 @@ function processQueue(error: Error | null, token: string | null = null) {
   failedQueue = [];
 }
 
-async function refreshTokens(): Promise<string> {
-  const refreshToken = getRefreshToken();
+export async function refreshTokens(
+  refreshTokenValue?: string
+): Promise<AuthRefreshResponse> {
+  const refreshToken = refreshTokenValue ?? getRefreshToken();
 
   if (!refreshToken) {
     throw new Error('No refresh token available');
   }
 
-  const { data } = await axios.post(
-    `${apiBaseURL}/auth/refresh`,
-    {},
-    {
-      headers: {
-        Authorization: `Bearer ${refreshToken}`,
-      },
-    }
-  );
-
+  const data = await refreshTokensRequest(refreshToken);
   setAccessToken(data.access_token);
   setRefreshToken(data.refresh_token);
 
-  return data.access_token;
+  return data;
 }
 
 api.interceptors.response.use(
@@ -149,11 +125,11 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const newToken = await refreshTokens();
-        processQueue(null, newToken);
+        const tokenData = await refreshTokens();
+        processQueue(null, tokenData.access_token);
 
         if (originalRequest.headers) {
-          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          originalRequest.headers.Authorization = `Bearer ${tokenData.access_token}`;
         }
 
         return api(originalRequest);

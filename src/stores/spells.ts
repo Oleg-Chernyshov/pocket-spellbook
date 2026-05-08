@@ -1,16 +1,18 @@
 import { defineStore } from 'pinia';
-import { api } from 'boot/axios';
 import { DEFAULT_LANGUAGE } from 'src/interfaces';
 import type {
-  PaginatedResponse,
   SpellListItem,
   SpellsQuery,
   LanguageCode,
   SpellLevel,
-  SpellSchool,
+  SpellSchoolFilterValue,
   SourceBook,
   CharacterClass,
 } from 'src/interfaces';
+import {
+  getCharacterClasses as getCharacterClassesRequest,
+  getSpells as getSpellsRequest,
+} from 'src/services/spell.service';
 
 type FetchState = 'idle' | 'loading' | 'error';
 
@@ -24,11 +26,11 @@ export const useSpellsStore = defineStore('spells', {
     language: DEFAULT_LANGUAGE as LanguageCode,
     search: '' as string,
     level: undefined as SpellLevel | undefined,
-    school: undefined as SpellSchool | undefined,
-    characterClass: undefined as number | undefined, // ID класса персонажа
+    school: undefined as SpellSchoolFilterValue | undefined,
+    characterClass: undefined as number | undefined,
     source: undefined as SourceBook | undefined,
     fetchState: 'idle' as FetchState,
-    characterClasses: [] as CharacterClass[], // Все классы персонажей
+    characterClasses: [] as CharacterClass[],
   }),
 
   getters: {
@@ -87,12 +89,7 @@ export const useSpellsStore = defineStore('spells', {
       if (!this.hasNext || this.fetchState === 'loading') return;
       this.fetchState = 'loading';
       try {
-        const { data } = await api.get<PaginatedResponse<SpellListItem>>(
-          '/spells',
-          {
-            params: this.query,
-          }
-        );
+        const data = await getSpellsRequest(this.query);
         this.items.push(...data.data);
         this.page += 1;
         this.hasNext = data.pagination.hasNext;
@@ -106,10 +103,9 @@ export const useSpellsStore = defineStore('spells', {
     },
 
     async fetchCharacterClasses(language?: LanguageCode): Promise<void> {
-      const { data } = await api.get<CharacterClass[]>('/spells/classes', {
-        params: { language: language || this.language },
-      });
-      this.characterClasses = data;
+      this.characterClasses = await getCharacterClassesRequest(
+        language || this.language
+      );
     },
   },
 });

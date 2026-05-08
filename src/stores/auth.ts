@@ -1,47 +1,35 @@
 import { defineStore } from 'pinia';
-import { api } from 'boot/axios';
-import axios from 'axios';
+import {
+  login as loginRequest,
+  refreshTokens as refreshTokensRequest,
+  register as registerRequest,
+} from 'src/services/auth.service';
+import {
+  safeGetItem,
+  safeSetOrRemoveItem,
+  STORAGE_KEYS,
+} from 'src/utils/storage';
+
 import type {
   AuthLoginRequest,
-  AuthLoginResponse,
-  AuthRefreshResponse,
   RegisterRequest,
   User,
 } from 'src/interfaces';
 
-const apiBaseURL = process.env.API_BASE_URL || 'http://localhost:3000';
-
-const ACCESS_TOKEN_STORAGE_KEY = 'ps_access_token';
-const REFRESH_TOKEN_STORAGE_KEY = 'ps_refresh_token';
-
 function saveToken(token: string | null): void {
-  try {
-    if (token) localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, token);
-    else localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
-  } catch {}
+  safeSetOrRemoveItem(STORAGE_KEYS.accessToken, token);
 }
 
 function readToken(): string | null {
-  try {
-    return localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
-  } catch {
-    return null;
-  }
+  return safeGetItem(STORAGE_KEYS.accessToken);
 }
 
 function saveRefreshToken(token: string | null): void {
-  try {
-    if (token) localStorage.setItem(REFRESH_TOKEN_STORAGE_KEY, token);
-    else localStorage.removeItem(REFRESH_TOKEN_STORAGE_KEY);
-  } catch {}
+  safeSetOrRemoveItem(STORAGE_KEYS.refreshToken, token);
 }
 
 function readRefreshToken(): string | null {
-  try {
-    return localStorage.getItem(REFRESH_TOKEN_STORAGE_KEY);
-  } catch {
-    return null;
-  }
+  return safeGetItem(STORAGE_KEYS.refreshToken);
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -61,11 +49,9 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async login(payload: AuthLoginRequest): Promise<void> {
       this.isLoading = true;
+
       try {
-        const { data } = await api.post<AuthLoginResponse>(
-          '/auth/login',
-          payload
-        );
+        const data = await loginRequest(payload);
 
         this.user = data.user;
         this.token = data.access_token;
@@ -82,7 +68,7 @@ export const useAuthStore = defineStore('auth', {
       this.isLoading = true;
 
       try {
-        await api.post('/auth/register', payload);
+        await registerRequest(payload);
         await this.login({ email: payload.email, password: payload.password });
       } finally {
         this.isLoading = false;
@@ -95,16 +81,7 @@ export const useAuthStore = defineStore('auth', {
       }
 
       try {
-        const { data } = await axios.post<AuthRefreshResponse>(
-          `${apiBaseURL}/auth/refresh`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${this.refreshToken}`,
-            },
-          }
-        );
-
+        const data = await refreshTokensRequest(this.refreshToken);
         this.token = data.access_token;
         this.refreshToken = data.refresh_token;
 
