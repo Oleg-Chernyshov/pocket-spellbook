@@ -21,6 +21,14 @@
         <q-icon name="schedule" size="14px" class="q-mx-xs" />
         {{ castingTime }}
       </div>
+      <q-linear-progress
+        v-if="score !== undefined"
+        :value="Math.max(0, Math.min(1, score))"
+        color="primary"
+        class="q-mt-sm"
+        rounded
+        size="4px"
+      />
     </q-item-section>
 
     <q-item-section v-if="$slots.actions" side top>
@@ -44,6 +52,7 @@ interface Props {
   school: string;
   range: string;
   castingTime: string;
+  score?: number;
 }
 
 defineOptions({ name: 'SpellListItem' })

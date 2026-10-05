@@ -77,6 +77,7 @@ export interface SpellListItem {
   components: string;
   duration: string;
   source: SourceBook;
+  score?: number;
 }
 
 export type SpellDetails = SpellListItem;
@@ -90,6 +91,7 @@ export interface SpellsQuery {
   characterClass?: number;
   language?: LanguageCode;
   source?: SourceBook;
+  smartSearch?: boolean;
 }
 
 export interface AuthLoginRequest {

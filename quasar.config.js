@@ -66,6 +66,7 @@ module.exports = configure(function (ctx) {
       // publicPath: '/',
       env: {
         API_BASE_URL: process.env.API_BASE_URL || 'http://localhost:3000',
+        AI_API_URL: process.env.AI_API_URL || 'http://localhost:8000',
         DEFAULT_LANGUAGE: process.env.DEFAULT_LANGUAGE || 'ru',
       },
 

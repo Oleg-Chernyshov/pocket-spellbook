@@ -29,11 +29,13 @@
         :school="school"
         :character-class="characterClass"
         :source="source"
+        :smart="smartSearch"
         @update:search="(v) => (search = v)"
         @update:level="(v) => (level = v)"
         @update:school="(v) => (school = v)"
         @update:characterClass="(v) => (characterClass = v)"
         @update:source="(v) => (source = v)"
+        @update:smart="(v) => (smartSearch = v)"
         @update:collapsed="(v) => (filtersCollapsed = v)"
         @reset="resetFilters"
       />
@@ -52,6 +54,7 @@
                 :school="spell.school"
                 :range="spell.range"
                 :casting-time="spell.castingTime"
+                :score="spell.score"
                 @click="openSpell(spell.id)"
               />
             </template>
@@ -129,6 +132,7 @@ const level = ref<SpellLevel | undefined>(spells.level);
 const school = ref<SpellSchoolFilterValue | undefined>(spells.school);
 const characterClass = ref<number | undefined>(spells.characterClass);
 const source = ref<SourceBook | undefined>(spells.source);
+const smartSearch = ref(spells.smartSearch);
 const spellsListScrollRef = ref<HTMLElement | null>(null);
 
 const items = computed(() => spells.items);
@@ -177,7 +181,7 @@ async function onLoad(_index: number, done: () => void) {
   }
 }
 
-watch([search, level, school, characterClass, source], async () => {
+watch([search, level, school, characterClass, source, smartSearch], async () => {
   if (suspendFilters.value) return;
 
   spells.setFilters({
@@ -186,6 +190,7 @@ watch([search, level, school, characterClass, source], async () => {
     school: school.value,
     characterClass: characterClass.value,
     source: source.value,
+    smartSearch: smartSearch.value,
   });
 
   await spells.resetAndFetch();

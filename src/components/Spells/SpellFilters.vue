@@ -26,19 +26,32 @@
     <q-slide-transition>
       <div v-show="!isCollapsed" class="row items-center q-col-gutter-sm">
         <div class="col-12">
-          <q-input
-            :model-value="search"
-            @update:model-value="onSearchUpdate"
-            dense
-            debounce="300"
-            :placeholder="t('filters.searchPlaceholder')"
-            clearable
-            filled
-          >
-            <template #append>
-              <q-icon name="search" />
-            </template>
-          </q-input>
+          <div class="row items-center q-col-gutter-sm">
+            <div class="col">
+              <q-input
+                :model-value="search"
+                @update:model-value="onSearchUpdate"
+                dense
+                debounce="300"
+                :placeholder="searchPlaceholder"
+                clearable
+                filled
+              >
+                <template #append>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+            </div>
+            <div class="col-auto">
+              <q-toggle
+                :model-value="smart"
+                @update:model-value="(v) => emit('update:smart', Boolean(v))"
+                :label="t('filters.smartSearch')"
+                color="primary"
+                dense
+              />
+            </div>
+          </div>
         </div>
 
         <div class="col-6">
@@ -121,6 +134,7 @@ interface Props {
   language: LanguageCode;
   classOptions: { label: string; value: number }[];
   collapsed?: boolean;
+  smart?: boolean;
   level?: SpellLevel;
   school?: SpellSchoolFilterValue;
   characterClass?: number;
@@ -136,12 +150,16 @@ const emit = defineEmits<{
   (e: 'update:school', v: SpellSchoolFilterValue | undefined): void;
   (e: 'update:characterClass', v: number | undefined): void;
   (e: 'update:source', v: SourceBook | undefined): void;
+  (e: 'update:smart', v: boolean): void;
   (e: 'update:collapsed', v: boolean): void;
   (e: 'reset'): void;
 }>();
 
 const { t } = useLocalT();
 const isRu = computed(() => props.language === 'ru');
+const searchPlaceholder = computed(() =>
+  props.smart ? t('filters.smartPlaceholder') : t('filters.searchPlaceholder')
+);
 const isCollapsed = computed({
   get: () => props.collapsed ?? false,
   set: (value: boolean) => emit('update:collapsed', value),

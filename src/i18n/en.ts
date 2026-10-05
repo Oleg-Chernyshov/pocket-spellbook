@@ -33,6 +33,8 @@ const en = {
   },
   filters: {
     searchPlaceholder: 'Search spells',
+    smartPlaceholder: 'Describe what the spell should do',
+    smartSearch: 'Smart search',
     level: 'Level',
     school: 'School',
     class: 'Class',

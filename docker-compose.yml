@@ -5,6 +5,7 @@ services:
       dockerfile: Dockerfile
       args:
         API_BASE_URL: ${API_BASE_URL:-http://localhost:3000}
+        AI_API_URL: ${AI_API_URL:-http://localhost:8000}
         DEFAULT_LANGUAGE: ${DEFAULT_LANGUAGE:-ru}
     ports:
       - "8080:80"

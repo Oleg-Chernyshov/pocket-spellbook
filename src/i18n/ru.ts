@@ -33,6 +33,8 @@ const ru = {
   },
   filters: {
     searchPlaceholder: 'Поиск заклинаний',
+    smartPlaceholder: 'Опишите, что должно делать заклинание',
+    smartSearch: 'Умный поиск',
     level: 'Круг',
     school: 'Школа',
     class: 'Класс',

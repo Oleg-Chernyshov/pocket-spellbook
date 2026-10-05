@@ -168,10 +168,13 @@ api.interceptors.response.use(
   }
 );
 
+const aiApiBaseURL = process.env.AI_API_URL || 'http://localhost:8000';
+const aiApi = axios.create({ baseURL: aiApiBaseURL });
+
 export default boot(({ app, router: appRouter }) => {
   router = appRouter;
   app.config.globalProperties.$axios = axios;
   app.config.globalProperties.$api = api;
 });
 
-export { api };
+export { api, aiApi };

@@ -13,8 +13,14 @@ import {
   getCharacterClasses as getCharacterClassesRequest,
   getSpells as getSpellsRequest,
 } from 'src/services/spell.service';
+import { smartSearchSpells as smartSearchSpellsRequest } from 'src/services/ai.service';
+import { safeGetItem, safeSetItem, STORAGE_KEYS } from 'src/utils/storage';
 
 type FetchState = 'idle' | 'loading' | 'error';
+
+function readSmartSearch(): boolean {
+  return safeGetItem(STORAGE_KEYS.smartSearch) === '1';
+}
 
 export const useSpellsStore = defineStore('spells', {
   state: () => ({
@@ -29,6 +35,7 @@ export const useSpellsStore = defineStore('spells', {
     school: undefined as SpellSchoolFilterValue | undefined,
     characterClass: undefined as number | undefined,
     source: undefined as SourceBook | undefined,
+    smartSearch: readSmartSearch(),
     fetchState: 'idle' as FetchState,
     characterClasses: [] as CharacterClass[],
   }),
@@ -76,6 +83,10 @@ export const useSpellsStore = defineStore('spells', {
       if (params.characterClass !== undefined)
         this.characterClass = params.characterClass;
       if (params.source !== undefined) this.source = params.source;
+      if (params.smartSearch !== undefined) {
+        this.smartSearch = params.smartSearch;
+        safeSetItem(STORAGE_KEYS.smartSearch, params.smartSearch ? '1' : '0');
+      }
     },
 
     resetAndFetch: async function (): Promise<void> {
@@ -89,7 +100,10 @@ export const useSpellsStore = defineStore('spells', {
       if (!this.hasNext || this.fetchState === 'loading') return;
       this.fetchState = 'loading';
       try {
-        const data = await getSpellsRequest(this.query);
+        const useSmartSearch = this.smartSearch && Boolean(this.search.trim());
+        const data = useSmartSearch
+          ? await smartSearchSpellsRequest(this.query)
+          : await getSpellsRequest(this.query);
         this.items.push(...data.data);
         this.page += 1;
         this.hasNext = data.pagination.hasNext;

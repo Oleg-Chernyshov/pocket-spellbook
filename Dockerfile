@@ -10,8 +10,10 @@ COPY . .
 
 # Build-time variables used by quasar.config.js
 ARG API_BASE_URL=http://localhost:3000
+ARG AI_API_URL=http://localhost:8000
 ARG DEFAULT_LANGUAGE=ru
 ENV API_BASE_URL=$API_BASE_URL
+ENV AI_API_URL=$AI_API_URL
 ENV DEFAULT_LANGUAGE=$DEFAULT_LANGUAGE
 
 RUN npx quasar build

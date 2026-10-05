@@ -2,6 +2,7 @@ export const STORAGE_KEYS = {
   accessToken: 'ps_access_token',
   refreshToken: 'ps_refresh_token',
   language: 'ps_language',
+  smartSearch: 'ps_smart_search',
 } as const;
 
 export function safeGetItem(key: string): string | null {
