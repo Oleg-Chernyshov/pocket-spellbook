@@ -83,7 +83,7 @@
           color="primary"
           :label="t('spells.createCharacter')"
           icon="person_add"
-          @click="router.push('/character')"
+          @click="router.push({ name: 'characters' })"
         />
         <q-btn
           class="ps-btn"
