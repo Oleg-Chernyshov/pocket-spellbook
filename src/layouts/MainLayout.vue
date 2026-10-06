@@ -97,16 +97,29 @@
           </q-item>
 
           <q-item
-            :active="route.name === 'character'"
+            :active="route.name === 'characters' || route.name === 'character'"
             class="ps-nav-item"
             clickable
-            :to="{ name: 'character' }"
+            :to="{ name: 'characters' }"
             active-class="ps-nav-item--active"
           >
             <q-item-section avatar class="ps-nav-avatar">
               <q-icon name="person" size="18px" />
             </q-item-section>
             <q-item-section>{{ t('nav.character') }}</q-item-section>
+          </q-item>
+
+          <q-item v-if="character.list.length > 1" class="q-px-sm q-pt-xs">
+            <q-select
+              dense
+              filled
+              emit-value
+              map-options
+              :model-value="character.active?.id"
+              :options="characterOptions"
+              :label="t('character.activeLabel')"
+              @update:model-value="onSelectCharacter"
+            />
           </q-item>
 
           <q-separator class="q-my-sm" />
@@ -168,12 +181,14 @@ import { useQuasar } from 'quasar';
 import { useRoute, useRouter } from 'vue-router';
 import { useUiStore } from 'src/stores/ui';
 import { useAuthStore } from 'src/stores/auth';
+import { useCharacterStore } from 'src/stores/character';
 import { useLocalT } from 'src/composables/useLocaleT';
 
 const $q = useQuasar();
 const { t } = useLocalT();
 const ui = useUiStore();
 const auth = useAuthStore();
+const character = useCharacterStore();
 const route = useRoute();
 const router = useRouter();
 
@@ -181,6 +196,12 @@ const isMobile = computed(() => $q.screen.lt.md);
 const isTablet = computed(() => $q.screen.lt.lg && !$q.screen.lt.sm);
 const showLanguageLabel = computed(() => !$q.screen.lt.sm);
 const isAuthenticated = computed(() => auth.isAuthenticated);
+const characterOptions = computed(() =>
+  character.list.map((item) => ({
+    label: item.name,
+    value: item.id,
+  }))
+);
 
 const leftDrawerOpen = computed({
   get: () => ui.leftDrawerOpen,
@@ -213,6 +234,15 @@ function handleLogout() {
   auth.logout();
   router.push({ name: 'login' });
   $q.notify({ type: 'info', message: t('auth.loggedOut') });
+}
+
+async function onSelectCharacter(id: number): Promise<void> {
+  if (!id || id === character.active?.id) return;
+
+  await character.select(id, ui.language);
+  if (route.name === 'character') {
+    await router.push({ name: 'character', params: { id: String(id) } });
+  }
 }
 </script>
 

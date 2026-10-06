@@ -13,10 +13,22 @@ const routes: RouteRecordRaw[] = [
       },
 
       {
-        path: 'character',
+        path: 'characters',
+        name: 'characters',
+        component: () => import('src/pages/CharactersPage.vue'),
+        meta: { requiresAuth: true },
+      },
+
+      {
+        path: 'character/:id',
         name: 'character',
         component: () => import('src/pages/CharacterPage.vue'),
         meta: { requiresAuth: true },
+      },
+
+      {
+        path: 'character',
+        redirect: { name: 'characters' },
       },
 
       {
