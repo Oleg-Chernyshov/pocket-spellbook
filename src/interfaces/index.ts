@@ -141,6 +141,9 @@ export interface Character {
   name: string;
   characterClassId: number;
   spellSlots?: Record<string, number>;
+  spellsCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ClassSpellsStatsResponse {
