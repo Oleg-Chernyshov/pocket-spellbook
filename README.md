@@ -42,6 +42,10 @@ quasar build
 
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-webpack/quasar-config-js).
 
+### Development process
+
+This project is also used to try out GitHub's project management features: issues, a GitHub Projects board, role-based branches, pull requests with code review, and CI. Contributor roles (`frontend-dev1`, `qa-lead`, and others) are notional — the project is developed by a single author.
+
 ### License & Legal Notice
 
 This project includes Open Game Content from the System Reference Document 5.1 as permitted under the Open Game License v1.0a.
