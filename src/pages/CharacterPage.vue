@@ -12,6 +12,15 @@
 
           <div class="col-auto">
             <q-btn
+              class="ps-btn q-mr-sm"
+              flat
+              dense
+              icon="arrow_back"
+              :label="t('character.backToList')"
+              @click="router.push({ name: 'characters' })"
+            />
+            <q-btn
+              v-if="character.active"
               class="ps-btn"
               :class="{ 'ps-btn-secondary': openSettings }"
               flat
@@ -25,7 +34,13 @@
 
         <q-separator />
 
-        <q-card-section v-if="!openSettings && character.active">
+        <q-card-section v-if="character.isLoading">
+          <div class="row justify-center q-py-md">
+            <q-spinner color="primary" size="2em" />
+          </div>
+        </q-card-section>
+
+        <q-card-section v-else-if="!openSettings && character.active">
           <div class="text-subtitle1 q-mb-sm">
             <strong>{{ name }}</strong>
           </div>
@@ -38,7 +53,7 @@
           />
         </q-card-section>
 
-        <q-card-section v-else>
+        <q-card-section v-else-if="character.active">
           <q-form @submit.prevent="save">
             <div class="row q-col-gutter-sm">
               <div class="col-12 col-md-6">
@@ -91,7 +106,7 @@
                   class="ps-btn"
                   type="submit"
                   color="primary"
-                  :label="character.active ? t('common.save') : t('common.create')"
+                  :label="t('common.save')"
                   :loading="saving"
                 />
 
@@ -177,7 +192,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref, computed, watch } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useCharacterStore } from 'src/stores/character';
 import { useSpellsStore } from 'src/stores/spells';
 import { type SpellListItem } from 'src/interfaces';
@@ -195,6 +210,7 @@ const spells = useSpellsStore();
 const ui = useUiStore();
 const { t } = useLocalT();
 const router = useRouter();
+const route = useRoute();
 const $q = useQuasar();
 
 const spellDialogOpen = ref(false);
@@ -209,14 +225,25 @@ onMounted(async () => {
     await spells.fetchCharacterClasses();
   }
 
-  if (!character.active) {
-    await character.loadActive(ui.language);
-  } else {
-    await character.loadSpells(character.active.id, ui.language);
+  await loadFromRoute();
+});
+
+async function loadFromRoute(): Promise<void> {
+  const id = Number(route.params.id);
+  if (!Number.isFinite(id)) {
+    router.replace({ name: 'characters' });
+    return;
   }
 
-  loadCharacterData();
-});
+  try {
+    await character.select(id, ui.language);
+    loadCharacterData();
+    openSettings.value = false;
+  } catch {
+    $q.notify({ type: 'negative', message: t('character.notFound') });
+    router.replace({ name: 'characters' });
+  }
+}
 
 function loadUsedSlotsFromStorage(
   characterId: number
@@ -321,6 +348,10 @@ function loadCharacterData(): void {
   }
 }
 
+watch(() => route.params.id, () => {
+  void loadFromRoute();
+});
+
 watch(() => character.active, loadCharacterData);
 
 watch(() => ui.language,
@@ -346,17 +377,7 @@ async function save() {
       });
 
       $q.notify({ type: 'positive', message: t('character.saved') });
-    } else {
-      await character.create(
-        {
-          name: name.value,
-          characterClassId: classId.value,
-          spellSlots: { ...spellSlots.value },
-        },
-        ui.language
-      );
-
-      $q.notify({ type: 'positive', message: t('character.created') });
+      openSettings.value = false;
     }
   } finally {
     saving.value = false;
@@ -369,7 +390,7 @@ async function handleDelete() {
   deleting.value = true;
   try {
     const charId = character.active.id;
-    await character.remove(charId);
+    await character.remove(charId, ui.language);
 
     try {
       localStorage.removeItem(`${USED_SLOTS_STORAGE_KEY}_${charId}`);
@@ -377,14 +398,9 @@ async function handleDelete() {
       // ignore storage errors
     }
 
-    name.value = '';
-    classId.value = null;
-
-    for (let i = 1; i <= 9; i++) spellSlots.value[String(i)] = 0;
-
-    usedSlots.value = createEmptyUsedSlots();
     deleteDialogOpen.value = false;
     $q.notify({ type: 'warning', message: t('character.deleted') });
+    router.push({ name: 'characters' });
   } finally {
     deleting.value = false;
   }
