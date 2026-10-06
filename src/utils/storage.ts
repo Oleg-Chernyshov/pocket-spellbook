@@ -3,6 +3,7 @@ export const STORAGE_KEYS = {
   refreshToken: 'ps_refresh_token',
   language: 'ps_language',
   smartSearch: 'ps_smart_search',
+  activeCharacterId: 'ps_active_character_id',
 } as const;
 
 export function safeGetItem(key: string): string | null {

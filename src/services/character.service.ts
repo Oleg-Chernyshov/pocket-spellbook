@@ -12,6 +12,11 @@ export async function getCharacters(): Promise<Character[]> {
   return data;
 }
 
+export async function getCharacter(id: number): Promise<Character> {
+  const { data } = await api.get<Character>(`/characters/${id}`);
+  return data;
+}
+
 export async function createCharacter(dto: CreateCharacterDto): Promise<Character> {
   const { data } = await api.post<Character>('/characters', dto);
   return data;
